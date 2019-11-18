@@ -87,7 +87,7 @@ sup, sub {
 
 pre {
   margin-top: 0.8em;
-  margin-bottom: 1.2em;
+  margin-bottom: 0;
 }
 
 p, ul, ol {
@@ -196,15 +196,11 @@ h1, h2, h3, h4, h5, h6, .h7, .h8, .h9, .h10 {
 }
 
 h1 {
-  font-weight: 500;
-  font-size: 2.441em;
-  margin-top: 1.214em;
-}
-
-h1 {
-  font-weight: 500;
-  font-size: 1.953em;
-  box-shadow: 0 1px 0 0 #ddd;
+    margin-top: 1.214em;
+    margin-bottom: 19px;
+    font-weight: 500;
+    font-size: 1.953em;
+    box-shadow: 0 1px 0 0 #ddd;
 }
 
 h2 {
@@ -445,7 +441,7 @@ span.at-tag {
 span.warning,
 .at-tag.deprecated {
   font-weight: normal;
-  color: crimson
+  color: #8eaf20;
 }
 
 span.warning {
@@ -607,7 +603,7 @@ ul.itemize li::before {
   display: block;
   /*content: "Contents";*/
   /* text-transform: uppercase; */
-  margin: 0.5em 0 1.414em;  
+  margin: 1.414em 0 0.5em;  
 }
 
 .toc_title a {
@@ -929,7 +925,7 @@ code span.string,
 }
 
 ul.info-attributes {
-    margin-top: -1.5ex;
+    margin-top: 0ex;
     margin-bottom: 1.5em;
     list-style: none;
 }
@@ -957,4 +953,21 @@ code.type {
 td div.info p {
     margin: 0;
     box-shadow: 0 1px 0 0 #ddd;
+}
+
+div.info {
+    margin-bottom: 2ex;
+    padding-left: 12px;    
+}
+
+td div.info {
+    margin: 0;
+}
+
+div.info-deprecated {
+    padding-top: 0.5em;
+}
+
+.info-desc p {
+    margin-bottom: 0;
 }
