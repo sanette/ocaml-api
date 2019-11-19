@@ -10,7 +10,14 @@ let with_dir = Filename.concat
 let do_option f = function
   | None -> ()
   | Some x -> f x
-                
+
+let copyright () =
+  "<div class=\"copyright\">The present documentation is copyright Institut \
+   National de Recherche en Informatique et en Automatique (INRIA). A complete \
+   version can be obtained from <a \
+   href=\"http://caml.inria.fr/pub/docs/manual-ocaml/\">this page</a>.</div>"
+  |> parse
+
 let process file out =
 
   sprintf "Processing %s ..." file |> pr;
@@ -88,6 +95,9 @@ let process file out =
   let logo_html = "<nav class=\"toc brand\"><a class=\"brand\" href=\"https://ocaml.org/\" ><img src=\"colour-logo-gray.svg\" class=\"svg\" alt=\"OCaml\" /></a></nav>" in
   prepend_child header (parse logo_html);
 
+  (* Add copyright *)
+  append_child body (copyright ());
+
   (* Save new html file *)
   let new_html = to_string soup in
   sprintf "Saving %s..." out |> pr;
@@ -106,7 +116,7 @@ let () =
   let processed = ref 0 in
   all_html_files ()
   |> List.iter (fun file ->
-      match process ~overwrite:false
+      match process ~overwrite:true
               (file |> with_dir "libref" |> with_dir home)
               (file |> with_dir "docs" |> with_dir home) with
       | Ok () -> incr processed
