@@ -1,9 +1,11 @@
 open Soup
 open Printf
 
-let debug = true
+let debug = false
 let pr = if debug then print_endline else fun _ -> ()
 let home = "."
+let src_dir = "libref"
+let dst_dir = "docs"
 
 let with_dir = Filename.concat
                  
@@ -11,6 +13,14 @@ let do_option f = function
   | None -> ()
   | Some x -> f x
 
+let map_option f = function
+  | None -> None
+  | Some x -> Some (f x)
+
+let flat_option f = function
+  | None -> None
+  | Some x -> f x
+  
 let copyright () =
   "<div class=\"copyright\">The present documentation is copyright Institut \
    National de Recherche en Informatique et en Automatique (INRIA). A complete \
@@ -109,18 +119,73 @@ let process ?(overwrite=false) file out =
   else Error (sprintf "File %s already exists." out)
 
 let all_html_files () =
-  Sys.readdir (with_dir home "libref") |> Array.to_list
+  Sys.readdir (with_dir home src_dir) |> Array.to_list
   |> List.filter (fun s -> Filename.extension s = ".html")
+
+
+(* Creation of a search bar *)
+let parse_pair = function
+  | [a; b] -> (a,b) 
+  | _ -> raise (Invalid_argument "parse_pair")
+
+let parse_tdlist = function
+  | [alist, []] -> let mdule, value = parse_pair alist in
+    pr (fst value);
+    (mdule, value, [])
+  | [[], infolist; alist, []] -> let mdule, value = parse_pair alist in
+    pr (fst value);
+    (mdule, value, infolist)
+  | _ -> raise (Invalid_argument "parse_tdlist")
+  
+let make_index () =
+  let html = read_file ("index_values.html"
+                        |> with_dir src_dir
+                        |> with_dir home) in
+  let soup = parse html in
+  soup $ "tbody"
+  |> select "tr"
+  |> fold (fun trlist tr ->
+      let tdlist =
+        tr $$ "td"
+        |> fold (fun tdlist td ->
+            let alist = td $$ ">a"
+                        |> fold (fun alist a ->
+                            (R.leaf_text a, R.attribute "href" a) :: alist
+                          ) [] in
+            let infolist = td $$ "div.info"
+                           |> to_list in
+            if alist = [] && infolist = [] then tdlist
+            else (alist, infolist) :: tdlist
+          ) [] in
+      if tdlist = [] then trlist
+      else (parse_tdlist tdlist) :: trlist
+    ) []
+
+let save_index file index =
+  let outch = open_out file in
+  output_string outch "var GENERAL_INDEX = [\n";
+  index
+  |> List.iter (fun (mdule, value, infolist) ->
+      fprintf outch "[\"%s\", \"%s\", \"%s\", \"%s\", \"%s\"],\n"
+        (fst mdule) (snd mdule) (fst value) (snd value)
+        (infolist |> List.map to_string |> String.concat " " |> String.escaped));
+  output_string outch "]\n";
+  close_out outch
 
 let () =
   let processed = ref 0 in
   all_html_files ()
   |> List.iter (fun file ->
       match process ~overwrite:true
-              (file |> with_dir "libref" |> with_dir home)
-              (file |> with_dir "docs" |> with_dir home) with
+              (file |> with_dir src_dir |> with_dir home)
+              (file |> with_dir dst_dir |> with_dir home) with
       | Ok () -> incr processed
       | Error s -> pr s
     );
   sprintf "Done: %u files have been processed." !processed |> pr
 
+let process_index () =
+  let t = Unix.gettimeofday () in
+  let index =  make_index () in
+  save_index "index.js" index;
+  sprintf "Time = %f\n" (Unix.gettimeofday () -. t) |> pr

@@ -128,11 +128,16 @@ li>*:first-child {
 
 a {
   text-decoration: none;
-  color: #92370A
+  color: #92370A;
+  /* box-shadow: 0 1px 0 0 #d8b68b; */
 }
 
 a:hover {
     box-shadow: 0 1px 0 0 #92370A;
+}
+
+td a:hover {
+    background: white;
 }
 
 /* Linked highlight */
@@ -250,7 +255,8 @@ tt, code, pre {
 
 pre {
     border-left: 4px solid #e69c7f;
-    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
     padding-left: 1ex;
 }
 
@@ -635,11 +641,14 @@ ul.itemize li::before {
   font-weight: 400;
   line-height: 1.6em;
   display: block;
+  padding-left: 4px;
 }
 
 .toc ul li a:hover {
-  box-shadow: none;
-  text-decoration: underline;
+    box-shadow: none;
+    background-color: #edbf84;
+    /* transition: .5s; */
+  /*text-decoration: underline;*/
 }
 
 /* First level titles */
@@ -932,7 +941,7 @@ ul.info-attributes {
 
 /* pour l'API */
 hr {
-    margin-bottom: 3em;
+    margin-bottom: 2em;
     visibility: hidden;
 }
 
@@ -954,10 +963,23 @@ td div.info p {
     margin: 0;
     box-shadow: 0 1px 0 0 #ddd;
 }
+td div.info { /* index page */
+    padding-left: 0;
+}
 
-div.info {
+td div.info div.info-desc {
+    margin-bottom: 0;
+}
+
+div.info div.info-desc {
     margin-bottom: 2ex;
-    padding-left: 12px;    
+    padding-left: 2em;
+}
+
+div.info.top div.info-desc {
+    padding-left: 0;
+    padding-bottom: 1em;
+    box-shadow: 0 1px 0 0 #ddd;
 }
 
 td div.info {
@@ -970,4 +992,20 @@ div.info-deprecated {
 
 .info-desc p {
     margin-bottom: 0;
+}
+
+/* essai pour les types union */
+td.typefieldcomment > code {
+    display: none; /* this only applies to "(*" and "*)" */
+}
+td.typefieldcomment {
+    padding: 0;
+}
+td.typefieldcomment p {
+    color: #776558;
+}
+
+.typetable tr td:nth-child(4).typefieldcomment { /* this should be the column with the type */
+    width: 60%; /* not optimal, see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Format.html#symbolic
+but leaving it automatic is not always good either: see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Arg.html */
 }

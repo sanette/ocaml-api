@@ -1,5 +1,5 @@
 (executable
  (name process)
  (flags "-rectypes")
- (libraries str lambdasoup higlo higlo.ocaml higlo.xml))
+ (libraries unix str lambdasoup higlo higlo.ocaml higlo.xml))
  
