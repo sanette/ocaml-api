@@ -1,7 +1,7 @@
 open Soup
 open Printf
 
-let debug = false
+let debug = true
 let pr = if debug then print_endline else fun _ -> ()
 let home = "."
 let src_dir = "libref"
@@ -20,7 +20,8 @@ let map_option f = function
 let flat_option f = function
   | None -> None
   | Some x -> f x
-  
+
+(* it doesn't work without the "()" for some reason... (BUG??) *)
 let copyright () =
   "<div class=\"copyright\">The present documentation is copyright Institut \
    National de Recherche en Informatique et en Automatique (INRIA). A complete \
@@ -28,11 +29,32 @@ let copyright () =
    href=\"http://caml.inria.fr/pub/docs/manual-ocaml/\">this page</a>.</div>"
   |> parse
 
-let process file out =
+let search_widget with_description =
+  sprintf "<div class=\"api_search\"><input type=\"text\" name=\"apisearch\" id=\"api_search\"
+	 onchange   = \"mySearch(%b);\"
+	 onkeypress = \"this.onchange();\"
+	 onpaste    = \"this.onchange();\"
+	 oninput    = \"this.onchange();\">
+<img src=\"search_icon.svg\" alt=\"Search\" class=\"svg\" onclick=\"mySearch(%b)\">%s</div>
+<div id=\"search_results\"></div>" with_description with_description
+    (if with_description then "(search values and descriptions)" else "")
+  |> parse
+
+let logo_html () = "<nav class=\"toc brand\"><a class=\"brand\" href=\"https://ocaml.org/\" ><img src=\"colour-logo-gray.svg\" class=\"svg\" alt=\"OCaml\" /></a></nav>" |> parse
+  
+let process ?(search=true) file out =
 
   sprintf "Processing %s ..." file |> pr;
   let html = read_file file in
   let soup = parse html in
+
+  if search then begin
+    let script1 = create_element "script" ~attributes:["src","index.js"] in
+    let script2 = create_element "script" ~attributes:["src","search.js"] in
+    let head = soup $ "head" in
+    append_child head script1;
+    append_child head script2
+  end;
 
   (* Add content wrapper *)
   let body = soup $ "body" in
@@ -94,16 +116,18 @@ let process file out =
       delete uli;
       append_child ul uli;
       unwrap uli;
+      if search then search_widget true |> prepend_child body;
       create_element "h1" ~inner_text:"The OCaml API"
-      |> prepend_child body 
-    | None -> (* Add "general index" link to all other files *)
+      |> prepend_child body;
+    | None ->
+      if search then search_widget false |> prepend_child nav;
+      (* Add "general index" link to all other files *)
       create_element "a" ~inner_text:"< General Index"
         ~attributes:["href", "index.html"]
       |> prepend_child nav in
 
   (* Add logo *)
-  let logo_html = "<nav class=\"toc brand\"><a class=\"brand\" href=\"https://ocaml.org/\" ><img src=\"colour-logo-gray.svg\" class=\"svg\" alt=\"OCaml\" /></a></nav>" in
-  prepend_child header (parse logo_html);
+  prepend_child header (logo_html ());
 
   (* Add copyright *)
   append_child body (copyright ());
@@ -136,7 +160,7 @@ let parse_tdlist = function
     pr (fst value);
     (mdule, value, infolist)
   | _ -> raise (Invalid_argument "parse_tdlist")
-  
+
 let make_index () =
   let html = read_file ("index_values.html"
                         |> with_dir src_dir

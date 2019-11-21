@@ -644,6 +644,19 @@ ul.itemize li::before {
   padding-left: 4px;
 }
 
+.toc input#api_search {
+    width: 88%;
+}
+
+.toc #search_results {
+    font-size: smaller;
+}
+
+.toc #search_results ul a {
+    display: inline-block;
+    padding-left: 0;
+}
+
 .toc ul li a:hover {
     box-shadow: none;
     background-color: #edbf84;
@@ -967,6 +980,25 @@ td div.info { /* index page */
     padding-left: 0;
 }
 
+.content > #search_results {
+    margin-top: 2em;
+}
+
+#search_results ul {
+    list-style: none;
+}
+
+#search_results li div.info { /* index page */
+    display: block;
+    max-width: 70%;
+    padding-left: 4em;
+    margin-bottom: 1ex;
+}
+
+#search_results li div.info p { /* index page */
+    margin: 0;
+}
+
 td div.info div.info-desc {
     margin-bottom: 0;
 }
@@ -1008,4 +1040,14 @@ td.typefieldcomment p {
 .typetable tr td:nth-child(4).typefieldcomment { /* this should be the column with the type */
     width: 60%; /* not optimal, see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Format.html#symbolic
 but leaving it automatic is not always good either: see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Arg.html */
+}
+
+.api_search img {
+    height: 1em;
+    vertical-align: middle;
+    margin-right: 1em;
+}
+    
+nav .api_search img {
+    margin-right: 0;
 }
