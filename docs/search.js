@@ -1,6 +1,12 @@
 // Searching the OCAML API.
 // San VU NGOC, 2019
 
+// TODO load on demand ?
+// https://stackoverflow.com/questions/10906836/javascript-to-load-another-js-file
+// persistent var ?
+// https://stackoverflow.com/questions/17309199/how-to-send-variables-from-one-file-to-another-in-javascript/17309679#17309679
+
+
 var MAX_RESULTS = 20;
 var MAX_ERROR = 10;
 
@@ -52,14 +58,15 @@ function mySearch (includeDescr) {
 	    { line.length = 4;
 	      // we remove the description part.
 	    }
-	    // we remove the html hrefs and add the Module.val complete name:
+	    // We remove the html hrefs and add the Module.val complete name:
 	    let cleanLine = [line[0], line[2], line[0] + '.' + line[2]];
 	    if ( includeDescr ) { cleanLine.push(line[4]); } // add the description
 	    //line.push(line[0] + '.' + line[2]);
 	    if (hasSubString(text, cleanLine))  // one could merge hasSubString ans subError for efficiency
-	    { line.push(subError(text, cleanLine));
+	    { line.push(subError(text, cleanLine)); // we add the error
 	      return (true); } else
 	    { return (false); }});
+	// We sort the results by relevance:
 	results.sort(function(line1, line2)
 		     {if (includeDescr)
 		      { return (line1[5] - line2[5]) } else { return (line1[4] - line2[4]) } });
@@ -81,5 +88,6 @@ function mySearch (includeDescr) {
 	}
     }
     document.getElementById("search_results").innerHTML = html;
+    //document.addEventListener( 'click', function ( e ) { console.log ("click-clack"); console.log(e); });
 }
 

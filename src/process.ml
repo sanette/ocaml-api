@@ -29,12 +29,13 @@ let copyright () =
    href=\"http://caml.inria.fr/pub/docs/manual-ocaml/\">this page</a>.</div>"
   |> parse
 
+(* We don't add the "onchange" event because it forces to click twice to an
+   external link after entering text. *)
 let search_widget with_description =
   sprintf "<div class=\"api_search\"><input type=\"text\" name=\"apisearch\" id=\"api_search\"
-	 onchange   = \"mySearch(%b);\"
-	 onkeypress = \"this.onchange();\"
-	 onpaste    = \"this.onchange();\"
-	 oninput    = \"this.onchange();\">
+	 oninput   = \"mySearch(%b);\"
+	 onkeypress = \"this.oninput();\"
+	 onpaste    = \"this.oninput();\">
 <img src=\"search_icon.svg\" alt=\"Search\" class=\"svg\" onclick=\"mySearch(%b)\">%s</div>
 <div id=\"search_results\"></div>" with_description with_description
     (if with_description then "(search values and descriptions)" else "")

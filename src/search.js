@@ -1,6 +1,12 @@
 // Searching the OCAML API.
 // San VU NGOC, 2019
 
+// TODO load on demand ?
+// https://stackoverflow.com/questions/10906836/javascript-to-load-another-js-file
+// persistent var ?
+// https://stackoverflow.com/questions/17309199/how-to-send-variables-from-one-file-to-another-in-javascript/17309679#17309679
+
+
 var MAX_RESULTS = 20;
 var MAX_ERROR = 10;
 
@@ -82,5 +88,6 @@ function mySearch (includeDescr) {
 	}
     }
     document.getElementById("search_results").innerHTML = html;
+    //document.addEventListener( 'click', function ( e ) { console.log ("click-clack"); console.log(e); });
 }
 
