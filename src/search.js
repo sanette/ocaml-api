@@ -3,9 +3,8 @@
 
 // TODO load on demand ?
 // https://stackoverflow.com/questions/10906836/javascript-to-load-another-js-file
-// persistent var ?
-// https://stackoverflow.com/questions/17309199/how-to-send-variables-from-one-file-to-another-in-javascript/17309679#17309679
 
+// TODO remove html elements from descriptions (in another field?)
 
 var MAX_RESULTS = 20;
 var MAX_ERROR = 10;
@@ -23,16 +22,39 @@ function hasSubString (sub, line) {
 	return (isSubString(sub,s)); }) !== -1);
 }
 
-function subError (sub, line) {
-    errors = line.map(function (s)
-		      { let err = s.indexOf(sub);
-			if (err == -1) { err = MAX_ERROR; }
-			else { err = Math.min(err,1) // 0 or 1
-			       + Math.abs((s.length - sub.length) / s.length);}
-			return (err)})
-    return (Math.min(Math.min(errors[0], errors[1]), errors[2])); // between 0 and 3, except if MAX_ERROR
+// Check if one of the strings in subs is a substring of one of the
+// strings in line.
+function hasSubStrings (subs, line) {
+    return (subs.findIndex(function (sub) {
+	return (hasSubString (sub, line)); }) !== -1);
 }
 
+// error of sub being a substring of s. Best if starts at 0. 
+function subError (sub, s) {
+    let err = s.indexOf(sub);
+    if (err == -1) { err = MAX_ERROR; }
+    else { err = Math.min(err,1) // 0 or 1
+	   + Math.abs((s.length - sub.length) / s.length);}
+    return (err)
+    // between 0 and 3, except if MAX_ERROR
+}
+
+function subMinError (sub, line) {
+    let strings = [line[0], line[1], line[2]];
+    let errs = strings.map(function (s) { return subError (sub, s); });
+    return Math.min(errs[0],errs[1],errs[2]);
+}
+    // do the general case?
+
+function add (acc, a) {
+    return acc + a;
+}
+
+function subsError (subs, s) {
+    let errs = subs.map(function (sub) { return subError (sub, s); });
+    return errs.reduce(add,0) / subs.length;
+}
+    
 // This should print "true" to the console
 //let line = ["abc", "123", "hello"];
 //console.log (hasSubString ("ell", line));
@@ -52,30 +74,42 @@ function mySearch (includeDescr) {
     let results = [];
     let html = "";
     let count = 0;
+    let err_index = 4;
     if (text !== "") {
+	let words = [];
+	if ( includeDescr ) {
+	    err_index = 5;
+	    // Split text into an array of non-empty words:
+	    words = text.split(" ").filter(function (s) {
+		return (s !== "");})}
 	results = GENERAL_INDEX.filter(function (line) {
-	    if (includeDescr == false )
-	    { line.length = 4;
-	      // we remove the description part.
-	    }
-	    // We remove the html hrefs and add the Module.val complete name:
+	    // We remove the html hrefs and add the Module.value complete name:
 	    let cleanLine = [line[0], line[2], line[0] + '.' + line[2]];
-	    if ( includeDescr ) { cleanLine.push(line[4]); } // add the description
-	    //line.push(line[0] + '.' + line[2]);
-	    if (hasSubString(text, cleanLine))  // one could merge hasSubString ans subError for efficiency
-	    { line.push(subError(text, cleanLine)); // we add the error
-	      return (true); } else
-	    { return (false); }});
+	    line.length = err_index;
+	    // this removes the description part if includeDescr =
+	    // false (which modifies the lines of the GENERAL_INDEX.)
+	    if ( includeDescr ) {
+		cleanLine.push(line[4]); } // add the description
+	    if ( hasSubString(text, cleanLine) ||
+		 // if includeDescr, we search for all separated words
+		 ( includeDescr && hasSubStrings(words, cleanLine))) {
+		// one could merge hasSubString and subMinError for efficiency
+		let error = subMinError(text, cleanLine);
+		if ( includeDescr ) {
+		    error = Math.min(error, subsError(words, line[4])); }
+		line.push(error); // we add the error as element #err_index
+		return (true); } else {
+		    return (false); }});
 	// We sort the results by relevance:
-	results.sort(function(line1, line2)
-		     {if (includeDescr)
-		      { return (line1[5] - line2[5]) } else { return (line1[4] - line2[4]) } });
+	results.sort(function(line1, line2) {
+	    return (line1[err_index] - line2[err_index])});
 	count = results.length;
 	console.log("Results = " + (count.toString()));
 	results.length = Math.min(results.length, MAX_RESULTS);
 	html = "no results";
-	//console.log (results[0]);
+	console.log (results[0]);
     }
+    // injects new html
     if (results.length > 0) {
 	html = "<ul>";
 	function myIter(line, index, array) {
