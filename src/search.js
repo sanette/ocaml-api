@@ -1,13 +1,36 @@
 // Searching the OCAML API.
 // San VU NGOC, 2019
 
-// TODO load on demand ?
-// https://stackoverflow.com/questions/10906836/javascript-to-load-another-js-file
-
 // TODO remove html elements from descriptions (in another field?)
 
-var MAX_RESULTS = 20;
-var MAX_ERROR = 10;
+const MAX_RESULTS = 20;
+const MAX_ERROR = 10;
+
+let indexState = 'NOT_LOADED';
+
+// return true if we are loading the index file
+function loadingIndex (includeDescr) {
+
+    switch (indexState) {
+    case 'NOT_LOADED':
+	indexState = 'LOADING';
+	
+	const script = document.createElement('script');
+	script.src = 'index.js';
+	script.addEventListener('load', () => {
+	    indexState = 'HAS_LOADED';
+	    mySearch(includeDescr);
+	});
+	document.head.appendChild(script);
+	return true;
+	
+    case 'LOADING':
+	return true;
+	
+    case 'HAS_LOADED':
+	return false;
+    }
+}
 
 function isSubString (sub, s) {
     //s = s.toLowerCase();
@@ -70,6 +93,9 @@ function formatLine (line) {
 }
     
 function mySearch (includeDescr) {
+    if (loadingIndex (includeDescr)) {
+	return;
+    }
     let text = document.getElementById('api_search').value;
     let results = [];
     let html = "";
@@ -107,7 +133,7 @@ function mySearch (includeDescr) {
 	console.log("Results = " + (count.toString()));
 	results.length = Math.min(results.length, MAX_RESULTS);
 	html = "no results";
-	console.log (results[0]);
+	//console.log (results[0]);
     }
     // injects new html
     if (results.length > 0) {

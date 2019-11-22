@@ -33,8 +33,9 @@ let copyright () =
    external link after entering text. *)
 let search_widget with_description =
   sprintf "<div class=\"api_search\"><input type=\"text\" name=\"apisearch\" id=\"api_search\"
-	 oninput   = \"mySearch(%b);\"
-	 onkeypress = \"this.oninput();\"
+	 oninput    = \"mySearch(%b);\"
+         onkeypress = \"this.oninput();\"
+         onclick    = \"this.oninput();\"
 	 onpaste    = \"this.oninput();\">
 <img src=\"search_icon.svg\" alt=\"Search\" class=\"svg\" onclick=\"mySearch(%b)\">%s</div>
 <div id=\"search_results\"></div>" with_description with_description
@@ -50,11 +51,9 @@ let process ?(search=true) file out =
   let soup = parse html in
 
   if search then begin
-    let script1 = create_element "script" ~attributes:["src","index.js"] in
-    let script2 = create_element "script" ~attributes:["src","search.js"] in
     let head = soup $ "head" in
-    append_child head script1;
-    append_child head script2
+    create_element "script" ~attributes:["src","search.js"] 
+    |> append_child head 
   end;
 
   (* Add content wrapper *)
