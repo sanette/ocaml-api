@@ -38,7 +38,7 @@ let search_widget with_description =
 	 onpaste    = \"this.oninput();\">
 <img src=\"search_icon.svg\" alt=\"Search\" class=\"svg\" onclick=\"mySearch(%b)\">%s</div>
 <div id=\"search_results\"></div>" with_description with_description
-    (if with_description then "(search values and descriptions)" else "")
+    (if with_description then "<span class=\"search_comment\">(search values and descriptions)</span>" else "")
   |> parse
 
 let logo_html () = "<nav class=\"toc brand\"><a class=\"brand\" href=\"https://ocaml.org/\" ><img src=\"colour-logo-gray.svg\" class=\"svg\" alt=\"OCaml\" /></a></nav>" |> parse

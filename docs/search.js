@@ -107,7 +107,7 @@ function mySearch (includeDescr) {
 	console.log("Results = " + (count.toString()));
 	results.length = Math.min(results.length, MAX_RESULTS);
 	html = "no results";
-	//console.log (results[0]);
+	console.log (results[0]);
     }
     // injects new html
     if (results.length > 0) {

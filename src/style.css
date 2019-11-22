@@ -693,47 +693,6 @@ ul.itemize li::before {
 
 /* Mobile adjustements. */
 
-@media only screen and (max-width: 95ex) {
-  .content {
-    margin: auto;
-    padding: 2.0em;
-  }
-  .toc {
-    position: static;
-    width: auto;
-    min-width: unset;
-    max-width: unset;
-    border: none;
-    padding: 0.2em 1em;
-    border-radius: 5px;
-  }
-}
-
-/* Print adjustements. */
-/* This page can be nicely printed or saved to PDF */
-
-@media print {
-  body {
-    color: black;
-    background: white;
-  }
-  body nav:first-child {
-      position: absolute;
-      background: transparent;
-  }
-  nav.toc {
-      margin-right: 1em;
-      float: left;
-  }
-  .toc {
-      position: initial;
-      background: #eee;
-  }
-  .content {
-      margin-left: 3em;
-      margin-right: 3em;
-  }
-}
 
 /* Syntax highlighting (based on github-gist) */
 
@@ -939,6 +898,7 @@ code span.string,
 }
 
 .copyright {
+    margin-top: 1em;
     font-size: smaller;
 }
 
@@ -958,14 +918,28 @@ hr {
     visibility: hidden;
 }
 
-/* faute de mieux pour le moment */
+
 table {
-    background: #eee;
+    /* must be same as <pre> */
+    background: linear-gradient(to left, white 0%, rgb(237, 232, 229) 100%);
 }
 
 table td {
     padding-left: 1ex;
     padding-right: 1ex;
+}
+
+/* add some room at the end of the table */
+table tr:last-child td {
+    padding-bottom: 7px;
+}
+
+.content>table {
+    word-break: break-word;
+}
+
+.content>table td:first-child {
+    width: 33%;
 }
 
 code.type {
@@ -1027,18 +1001,46 @@ div.info-deprecated {
 }
 
 /* essai pour les types union */
+table.typetable {
+    width: 100%;
+    word-break: normal;
+    box-shadow: none;
+}
+
 td.typefieldcomment > code {
     display: none; /* this only applies to "(*" and "*)" */
 }
+
 td.typefieldcomment {
     padding: 0;
 }
+
 td.typefieldcomment p {
     color: #776558;
 }
 
-.typetable tr td:nth-child(4).typefieldcomment { /* this should be the column with the type */
-    width: 60%; /* not optimal, see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Format.html#symbolic
+td.typefieldcomment:nth-child(3), /* should apply to "(*" */
+td.typefieldcomment:last-child /* should apply to "*)" */
+{
+    display: none; 
+}
+
+table.typetable td:nth-child(2) {
+    width: 7ex;
+    white-space: nowrap;
+}
+
+table.typetable td:last-child {
+    width: auto;
+}
+
+table.typetable tr td:first-child {
+    width: 1em;
+}
+
+table.typetable tr td:nth-child(4).typefieldcomment { /* this should be the column with the type */
+ /*   width: 60%;*/
+/* not optimal, see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Format.html#symbolic
 but leaving it automatic is not always good either: see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Arg.html */
 }
 
@@ -1050,4 +1052,68 @@ but leaving it automatic is not always good either: see: file:///home/san/prog/o
     
 nav .api_search img {
     margin-right: 0;
+}
+
+
+@media only screen and (max-width: 95ex) {
+    .content {
+	margin: auto;
+	padding: 2.0em;
+    }
+    .content>header {
+	box-shadow:   0px 3px 9px 3px #ddd;
+    }
+    .toc {
+	position: static;
+	width: auto;
+	min-width: unset;
+	max-width: unset;
+	border: none;
+	padding: 0.2em 1em;
+	/*border-radius: 0 0 5px 5px;*/ /* change this for ocamlorg */
+    }
+    .toc.brand {
+	/*border-radius: 5px 5px 0 0;*/
+	/* border-radius doesn't play well with a global box-shadow */
+    }
+    .content>table {
+	box-shadow:   0px 3px 9px 3px #ddd;
+	margin-bottom: 1em;
+	padding-bottom: 2px;
+    }
+    table.typetable {
+	box-shadow: none;
+    }
+    span.search_comment {
+	display: block;
+    }
+    .content>table td:first-child {
+    width: 40%;
+}
+}
+
+/* Print adjustements. */
+/* This page can be nicely printed or saved to PDF */
+
+@media print {
+  body {
+    color: black;
+    background: white;
+  }
+  body nav:first-child {
+      position: absolute;
+      background: transparent;
+  }
+  nav.toc {
+      margin-right: 1em;
+      float: left;
+  }
+  .toc {
+      position: initial;
+      background: #eee;
+  }
+  .content {
+      margin-left: 3em;
+      margin-right: 3em;
+  }
 }
