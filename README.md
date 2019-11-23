@@ -1,4 +1,4 @@
-# ocaml-api
+# OCaml-api
 
 Proposition for modernizing the OCaml API from the official manual
 
@@ -10,7 +10,7 @@ copyright Institut National de Recherche en Informatique et en
 Automatique (INRIA). A complete version can be obtained from
 [this page](http://caml.inria.fr/pub/docs/manual-ocaml/)._
 
-# running the script
+# Running the script
 
 1. Install lambdasoup
 
@@ -34,9 +34,31 @@ In the `ocaml-api` directory, run `make`.  This will run the
 `process.ml` script, which populates the `docs` directory, and copy
 the css, js and svg files.
 
-Note: the `index.js` file can be re-created from scratch (see the
-`process.ml` file), but it's a bit long (15 sec on my laptop).
 
 5. Browse!
 
 `firefox docs/index.html`
+
+# More options
+
+Cleaning the `docs` driectory:
+
+```make clean```
+
+The `index.js` file can be re-created from scratch, but it's a bit
+long (15 sec on my laptop):
+
+```make index```
+
+The behaviour of the script can be controlled by a few keywords:
+`makeindex`, `overwrite`, `silent`, and `html`. (`html` is true by
+default unless `makeindex` is present.)
+
+```
+dune exec src/process.exe                # only process html files
+dune exec src/process.exe makeindex      # only create the index file
+dune exec src/process.exe overwrite      # force overwriting existing html files
+dune exec src/process.exe makeindex html # create index and process html files
+dune exec src/process.exe [...] silent   # suppress console output
+etc... (all kewords can be combined)
+```

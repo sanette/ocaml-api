@@ -1,7 +1,10 @@
 open Soup
 open Printf
 
-let debug = true
+let debug = match Array.to_list Sys.argv with
+  | [] -> true
+  | list -> not (List.mem "silent" list)
+  
 let pr = if debug then print_endline else fun _ -> ()
 let home = "."
 let src_dir = "libref"
@@ -196,20 +199,29 @@ let save_index file index =
   output_string outch "]\n";
   close_out outch
 
-let () =
+let process_index () =
+  pr "Recreatig index file, please wait...";
+  let t = Unix.gettimeofday () in
+  let index =  make_index () in
+  save_index "index.js" index;
+  sprintf "Done. Time = %f\n" (Unix.gettimeofday () -. t) |> pr
+
+let process_html overwrite =
   let processed = ref 0 in
   all_html_files ()
   |> List.iter (fun file ->
-      match process ~overwrite:true
+      match process ~overwrite
               (file |> with_dir src_dir |> with_dir home)
               (file |> with_dir dst_dir |> with_dir home) with
       | Ok () -> incr processed
       | Error s -> pr s
     );
-  sprintf "Done: %u files have been processed." !processed |> pr
+  sprintf "HTML processing done: %u files have been processed." !processed |> pr
 
-let process_index () =
-  let t = Unix.gettimeofday () in
-  let index =  make_index () in
-  save_index "index.js" index;
-  sprintf "Time = %f\n" (Unix.gettimeofday () -. t) |> pr
+let () =
+  let args = Sys.argv |> Array.to_list |> List.tl in
+  let overwrite = List.mem "overwrite" args in
+  let makeindex = List.mem "makeindex" args in
+  let makehtml = List.mem "html" args || not makeindex in
+  if makehtml then process_html overwrite;
+  if makeindex then process_index ()

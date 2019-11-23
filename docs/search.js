@@ -59,7 +59,7 @@ function subError (sub, s) {
     else { err = Math.min(err,1) // 0 or 1
 	   + Math.abs((s.length - sub.length) / s.length);}
     return (err)
-    // between 0 and 3, except if MAX_ERROR
+    // between 0 and 2, except if MAX_ERROR
 }
 
 function subMinError (sub, line) {
