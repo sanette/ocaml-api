@@ -158,10 +158,15 @@ let parse_pair = function
 let parse_tdlist = function
   | [alist, []] -> let mdule, value = parse_pair alist in
     pr (fst value);
-    (mdule, value, [])
-  | [[], infolist; alist, []] -> let mdule, value = parse_pair alist in
+    (mdule, value, ("",""))
+  | [[], infolist; alist, []] ->
+    let mdule, value = parse_pair alist in
+    let infohtml, infotext = List.split infolist in
+    let infohtml = infohtml |> List.map to_string |> String.concat " "
+                   |> String.escaped in
+    let infotext = infotext |> String.concat " " |> String.escaped in
     pr (fst value);
-    (mdule, value, infolist)
+    (mdule, value, (infohtml, infotext))
   | _ -> raise (Invalid_argument "parse_tdlist")
 
 let make_index () =
@@ -169,7 +174,7 @@ let make_index () =
                         |> with_dir src_dir
                         |> with_dir home) in
   let soup = parse html in
-  soup $ "tbody"
+  soup $ "table"
   |> select "tr"
   |> fold (fun trlist tr ->
       let tdlist =
@@ -192,27 +197,88 @@ let make_index () =
       else (parse_tdlist tdlist) :: trlist
     ) []
 
+
+(* Fast version of make_index using Scanf *)
+(******************************************)
+module Index = struct
+
+  open Scanf
+  let index_len = 2545
+
+  let sid x : string = x
+
+  let rec find ch word =
+    if Scanning.end_of_input ch then raise Not_found
+    else if bscanf ch "%s " sid <> word then find ch word
+
+  (* Return all words encountered before reaching [word]. All 'spaces' between
+     words are replaced by single ' 's. *)
+  let concat_before ch word =
+    let b = Buffer.create 256 in
+    let rec loop () = 
+      if Scanning.end_of_input ch then raise Not_found;
+      let next = bscanf ch "%s " sid in
+      if next <> word then begin
+        Buffer.add_char b ' ';
+        Buffer.add_string b next;
+        loop ()
+      end else Buffer.contents b in
+    loop ()
+
+  let extract_infotext list =
+    list |> List.map (fun (a, (val_name, val_ref), info) ->
+        let infotext = Soup.texts (Soup.parse info) |> String.concat "" in
+        let val_name = Soup.(parse val_name |> R.leaf_text) in
+        (* We parse [val_name] simply to replace "&amp;" by "&", etc... it could
+           be done much faster manually of course (saving 20% time...): there
+           are only a very limited number of such cases. *)
+        (a, (val_name, val_ref),
+         (String.escaped info, String.escaped infotext)))
+
+  let make () =
+    let ch = Scanning.open_in ("index_values.html" |> with_dir src_dir) in
+    find ch "<table>";
+    let rec loop list =
+      if try find ch "<tr><td><a"; false with Not_found -> true
+      then list
+      else let val_ref = bscanf ch " href=%S" sid in
+        let val_name = bscanf ch ">%s@<" sid in
+        find ch  "[<a";
+        let mod_ref = bscanf ch " href=%S" sid in
+        let mod_name = bscanf ch ">%s@<" sid in
+        bscanf ch "/a>]</td> <td>" ();
+        let info = match bscanf ch "<%s@>" sid with
+          | "/td" -> find ch "</tr>"; ""
+          | "div class=\"info\"" -> 
+            let s = concat_before ch "</td></tr>" in
+            "<div class=\"info\">" ^ s
+          | s -> raise (Scan_failure s) in
+        pr val_ref;
+        let new_entry = ((mod_name, mod_ref), (val_name, val_ref), info) in
+        loop (new_entry :: list) in
+    loop []
+    |> extract_infotext
+
+end
+(******************************************)
+
 let save_index file index =
   let outch = open_out file in
   output_string outch "var GENERAL_INDEX = [\n";
   index
   |> List.iter (fun (mdule, value, infolist) ->
-      let infohtml, infotext = List.split infolist in
-      let infohtml = infohtml |> List.map to_string |> String.concat " "
-                     |> String.escaped in
-      let infotext = infotext |> String.concat " " |> String.escaped in
       fprintf outch "[\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\"],\n"
-        (fst mdule) (snd mdule) (fst value) (snd value)
-        infohtml infotext);
+        (fst mdule) (snd mdule) (fst value) (snd value) (fst infolist) (snd infolist));
   output_string outch "]\n";
   close_out outch
 
-let process_index () =
+let process_index ?(fast=true) () =
   pr "Recreatig index file, please wait...";
   let t = Unix.gettimeofday () in
-  let index =  make_index () in
+  let index = if fast then Index.make () else make_index () in
+  sprintf "Index created. Time = %f\n" (Unix.gettimeofday () -. t) |> pr;
   save_index (with_dir home "src/index.js") index;
-  sprintf "Done. Time = %f\n" (Unix.gettimeofday () -. t) |> pr
+  sprintf "Index saved. Time = %f\n" (Unix.gettimeofday () -. t) |> pr
 
 let process_html overwrite =
   let processed = ref 0 in

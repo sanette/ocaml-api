@@ -45,8 +45,7 @@ Cleaning the `docs` directory:
 
 ```make clean```
 
-The `src/index.js` file can be re-created from scratch, but it's a bit
-long (18 sec on my laptop):
+The `src/index.js` file can be re-created from scratch:
 
 ```make index```
 

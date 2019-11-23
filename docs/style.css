@@ -33,7 +33,14 @@ table {
 }
 
 html {
-  font-size: 15px;
+    font-size: 15px;
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {

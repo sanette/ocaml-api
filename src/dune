@@ -1,4 +1,4 @@
 (executable
  (name process)
+ (modules process)
  (libraries unix str lambdasoup))
- 
