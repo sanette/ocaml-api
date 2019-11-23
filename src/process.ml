@@ -180,7 +180,11 @@ let make_index () =
                             (R.leaf_text a, R.attribute "href" a) :: alist
                           ) [] in
             let infolist = td $$ "div.info"
-                           |> to_list in
+                           |> to_list
+                           |> List.map (fun info ->
+                               let infotext = texts info
+                                              |> String.concat "" in
+                               (info, infotext)) in
             if alist = [] && infolist = [] then tdlist
             else (alist, infolist) :: tdlist
           ) [] in
@@ -193,9 +197,13 @@ let save_index file index =
   output_string outch "var GENERAL_INDEX = [\n";
   index
   |> List.iter (fun (mdule, value, infolist) ->
-      fprintf outch "[\"%s\", \"%s\", \"%s\", \"%s\", \"%s\"],\n"
+      let infohtml, infotext = List.split infolist in
+      let infohtml = infohtml |> List.map to_string |> String.concat " "
+                     |> String.escaped in
+      let infotext = infotext |> String.concat " " |> String.escaped in
+      fprintf outch "[\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\"],\n"
         (fst mdule) (snd mdule) (fst value) (snd value)
-        (infolist |> List.map to_string |> String.concat " " |> String.escaped));
+        infohtml infotext);
   output_string outch "]\n";
   close_out outch
 
@@ -203,7 +211,7 @@ let process_index () =
   pr "Recreatig index file, please wait...";
   let t = Unix.gettimeofday () in
   let index =  make_index () in
-  save_index "index.js" index;
+  save_index (with_dir home "src/index.js") index;
   sprintf "Done. Time = %f\n" (Unix.gettimeofday () -. t) |> pr
 
 let process_html overwrite =

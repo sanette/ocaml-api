@@ -1,7 +1,7 @@
 // Searching the OCAML API.
 // San VU NGOC, 2019
 
-// TODO remove html elements from descriptions (in another field?)
+// Thanks @steinuil for help on deferred loading.
 
 const MAX_RESULTS = 20;
 const MAX_ERROR = 10;
@@ -33,8 +33,9 @@ function loadingIndex (includeDescr) {
 }
 
 function isSubString (sub, s) {
-    //s = s.toLowerCase();
-    //sub = sub.toLowerCase();
+    // s = s.toLowerCase();
+    // sub = sub.toLowerCase();
+    // case sensitive is better for OCaml modules.
     return (s.indexOf(sub) !== -1);
 }
 
@@ -91,7 +92,20 @@ function formatLine (line) {
     if (line.length > 5) { html += line[4]; }
     return (html);
 }
-    
+
+// The initial format of an entry of the GENERAL_INDEX array is
+// [ module, module_link,
+//   value, value_link,
+//   html_description, bare_description ]
+
+// If includeDescr is true, the line is truncated to its first 4
+// elements.  When searching, the search error is added at the end of
+// each line.
+
+// In order to reduce the size of the index.js file, one could create
+// the bare_description on-the-fly using .textContent, see
+// https://stackoverflow.com/questions/28899298/extract-the-text-out-of-html-string-using-javascript,
+// but it would probably make searching slower (haven't tested).
 function mySearch (includeDescr) {
     if (loadingIndex (includeDescr)) {
 	return;
@@ -104,7 +118,7 @@ function mySearch (includeDescr) {
     if (text !== "") {
 	let words = [];
 	if ( includeDescr ) {
-	    err_index = 5;
+	    err_index = 6;
 	    // Split text into an array of non-empty words:
 	    words = text.split(" ").filter(function (s) {
 		return (s !== "");})}
@@ -115,14 +129,14 @@ function mySearch (includeDescr) {
 	    // this removes the description part if includeDescr =
 	    // false (which modifies the lines of the GENERAL_INDEX.)
 	    if ( includeDescr ) {
-		cleanLine.push(line[4]); } // add the description
+		cleanLine.push(line[5]); } // add the description
 	    if ( hasSubString(text, cleanLine) ||
 		 // if includeDescr, we search for all separated words
 		 ( includeDescr && hasSubStrings(words, cleanLine))) {
 		// one could merge hasSubString and subMinError for efficiency
 		let error = subMinError(text, cleanLine);
 		if ( includeDescr ) {
-		    error = Math.min(error, subsError(words, line[4])); }
+		    error = Math.min(error, subsError(words, line[5])); }
 		line.push(error); // we add the error as element #err_index
 		return (true); } else {
 		    return (false); }});
