@@ -41,7 +41,7 @@ the css, js and svg files.
 
 # More options
 
-Cleaning the `docs` driectory:
+Cleaning the `docs` directory:
 
 ```make clean```
 
@@ -60,5 +60,5 @@ dune exec src/process.exe makeindex      # only create the index file
 dune exec src/process.exe overwrite      # force overwriting existing html files
 dune exec src/process.exe makeindex html # create index and process html files
 dune exec src/process.exe [...] silent   # suppress console output
-etc... (all kewords can be combined)
+etc... (all keywords can be combined)
 ```
