@@ -53,10 +53,13 @@ let process ?(search=true) file out =
   let html = read_file file in
   let soup = parse html in
 
+  (* Add javascript files *)
   if search then begin
     let head = soup $ "head" in
     create_element "script" ~attributes:["src","search.js"] 
-    |> append_child head 
+    |> append_child head;
+    create_element "script" ~attributes:["src","scroll.js"]
+    |> append_child head;  
   end;
 
   (* Add content wrapper *)

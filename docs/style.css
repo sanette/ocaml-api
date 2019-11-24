@@ -34,6 +34,9 @@ table {
 
 html {
     font-size: 15px;
+}
+
+html.smooth-scroll {
     scroll-behavior: smooth;
 }
 
