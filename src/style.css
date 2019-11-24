@@ -271,10 +271,10 @@ pre {
 }
 
 p code, li code { /* useful ? */
-  background-color: #f6f8fa;
-  color: #0d2b3e;
-  border-radius: 3px;
-  padding: 0 0.3ex;
+    background-color: #ebf2f9;  /*#f6f8fa;*/
+    color: #0d2b3e;
+    border-radius: 3px;
+    padding: 0 0.3ex;
 }
 
 pre code {
@@ -937,6 +937,7 @@ table {
 table td {
     padding-left: 1ex;
     padding-right: 1ex;
+    float: left;
 }
 
 /* add some room at the end of the table */
@@ -948,8 +949,12 @@ table tr:last-child td {
     word-break: break-word;
 }
 
-.content>table td:first-child {
+.content>table td.module {
     width: 33%;
+}
+
+.content>table td:nth-child(2) {
+    width: 65%;
 }
 
 code.type {
@@ -1036,7 +1041,7 @@ td.typefieldcomment:last-child /* should apply to "*)" */
 }
 
 table.typetable td:nth-child(2) {
-    width: 7ex;
+    width: 35%;
     white-space: nowrap;
 }
 
@@ -1049,7 +1054,7 @@ table.typetable tr td:first-child {
 }
 
 table.typetable tr td:nth-child(4).typefieldcomment { /* this should be the column with the type */
- /*   width: 60%;*/
+   width: 60%;
 /* not optimal, see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Format.html#symbolic
 but leaving it automatic is not always good either: see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Arg.html */
 }
@@ -1094,12 +1099,33 @@ nav .api_search img {
     table.typetable {
 	box-shadow: none;
     }
+    table.typetable td:nth-child(2) {
+	white-space: normal;
+	width: 41%;
+    }
+    table.typetable tr td:nth-child(4).typefieldcomment {
+	width: 50%;
+	word-break: break-word;
+    }
+    table.typetable td:last-child {
+	width: auto;
+    }
+    table.typetable tr td:first-child {
+	padding-right: 0;
+	width: auto;
+    }
+    td div.info div.info-desc {
+	padding-left: 0;
+    }
     span.search_comment {
 	display: block;
     }
     .content>table td:first-child {
     width: 40%;
-}
+    }
+    code {
+	word-break: break-word;
+    }
 }
 
 /* Print adjustements. */
