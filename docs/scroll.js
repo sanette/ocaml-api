@@ -6,7 +6,8 @@
 const MAX_DISTANCE = 1000;
 
 const url = window.location.pathname;
-const filename = url.substring(url.lastIndexOf('/')+1);
+var filename = url.substring(url.lastIndexOf('/')+1);
+if (filename == "") { filename = "index.html"; }
 
 function localLink (link) {
     return (link.length > 0 &&
