@@ -9,8 +9,9 @@ const url = window.location.pathname;
 const filename = url.substring(url.lastIndexOf('/')+1);
 
 function localLink (link) {
-    return (link.charAt(0) == '#'
-	    || link.substring(0,filename.length) == filename);
+    return (link.length > 0 &&
+	    (link.charAt(0) == '#'
+	     || link.substring(0,filename.length) == filename));
 }
 
 //aaa.html#coucou --> coucou
@@ -41,21 +42,14 @@ function setSmooth () {
 	    //let top = getPosition(a[i]);
 	    a[i].onclick = function () {
 		let id = getId(href);
+		//console.log(id);
 		let target = document.getElementById(id);
+		if (! target) { target = document.body; }
 		let top = document.body.scrollTop;
 		let dist = top - getPosition(target)
-		console.log ("click ==> " + getId(href) + "distance = " + parseInt(Math.abs(dist)));
+		//console.log ("click ==> " + getId(href) + "distance = " + parseInt(Math.abs(dist)));
 		if (Math.abs(dist) < MAX_DISTANCE) {
-		    document.body.parentNode.classList.add("smooth-scroll");
-		    setTimeout(function () {
-			location.href = href;
-			setTimeout(function () {
-			    document.body.parentNode.classList.remove("smooth-scroll");
-			}, 1000); // We wait 1sec, because Firefox
-				  // will stop immediately the
-				  // scrolling when the smooth-scroll
-				  // property is reset...
-		    }, 100)
+		    target.scrollIntoView({ behavior: 'smooth' });
 		    return false;
 		    // so we don't follow the link immediately
 		}
