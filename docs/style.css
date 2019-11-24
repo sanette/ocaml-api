@@ -1042,8 +1042,7 @@ td.typefieldcomment:last-child /* should apply to "*)" */
 
 table.typetable td:nth-child(2) {
     width: 35%;
-    white-space: nowrap;
-}
+ }
 
 table.typetable td:last-child {
     width: auto;
