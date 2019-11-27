@@ -110,7 +110,7 @@ let process ?(search=true) file out =
         li_of_h !h3_current h
       | _ -> ());
   let title = soup $ "title" |> R.leaf_text in
-  let a = create_element "a" ~inner_text:title ~attributes:["href", "#"] in
+  let a = create_element "a" ~inner_text:title ~attributes:["href", "#top"] in
   let div = create_element ~class_:"toc_title" "div" in
   append_child div a;
   prepend_child nav div;
