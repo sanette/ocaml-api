@@ -1,6 +1,9 @@
 open Soup
 open Printf
 
+let ocamlorg = false
+(* set this to true to generate the .md files for ocaml.org *)
+  
 let debug = match Array.to_list Sys.argv with
   | [] -> true
   | list -> not (List.mem "silent" list)
@@ -24,6 +27,10 @@ let flat_option f = function
   | None -> None
   | Some x -> f x
 
+
+(* Header for ocaml.org md files. *)
+let md_head = "<!-- ((! set title API !)) ((! set documentation !)) ((! set api !)) ((! set nobreadcrumb !)) -->\n"
+  
 (* it doesn't work without the "()" for some reason... (BUG??) *)
 let copyright () =
   "<div class=\"copyright\">The present documentation is copyright Institut \
@@ -65,6 +72,7 @@ let process ?(search=true) file out =
   (* Add content wrapper *)
   let body = soup $ "body" in
   set_name "div" body;
+  add_class "api" body;
   add_class "content" body;
   wrap body (create_element "body");
 
@@ -144,8 +152,15 @@ let process ?(search=true) file out =
   (* Save new html file *)
   let new_html = to_string soup in
   sprintf "Saving %s..." out |> pr;
-  write_file out new_html
+  write_file out new_html;
 
+  (* Save ocamlorg md file *)
+  if ocamlorg then
+    let md = Filename.remove_extension out ^ ".md" in
+    soup $ "div.api" |> to_string
+    |> (^) md_head 
+    |> write_file md
+      
 let process ?(overwrite=false) file out =
   if overwrite || not (Sys.file_exists out)
   then Ok (process file out)
@@ -305,3 +320,4 @@ let () =
   let makehtml = List.mem "html" args || not makeindex in
   if makehtml then process_html overwrite;
   if makeindex then process_index ()
+      

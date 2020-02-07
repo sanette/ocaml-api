@@ -3,6 +3,9 @@
 
 // if a link is located at distance larger than MAX_DISTANCE, we don't
 // use a smooth scrolling.
+
+console.log ("loading scroll.js");
+
 const MAX_DISTANCE = 1000;
 
 const url = window.location.pathname;
@@ -35,6 +38,8 @@ function getPosition(el) {
 function setSmooth () {
     let x = document.getElementsByClassName("toc_title");
     let a = document.getElementsByTagName("a");
+    // let container = document.body.parentNode; // for ocaml.org
+    let container = document.body; // for local
     let i;
     for (i = 0; i < a.length; i++) {
 	let href = a[i].getAttribute("href");
@@ -46,9 +51,9 @@ function setSmooth () {
 		//console.log(id);
 		let target = document.getElementById(id);
 		if (! target) { target = document.body.parentNode; }
-		let top = document.body.scrollTop;
+		let top = container.scrollTop;
 		let dist = top - getPosition(target)
-		//console.log ("click ==> " + getId(href) + "distance = " + parseInt(Math.abs(dist)));
+		//console.log ("click ==> " + getId(href) + ", distance = " + parseInt(Math.abs(dist)));
 		if (Math.abs(dist) < MAX_DISTANCE) {
 		    target.scrollIntoView({ block: "start", inline: "nearest", behavior: 'smooth' });
 		    setTimeout(function () {
