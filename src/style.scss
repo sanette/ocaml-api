@@ -2,6 +2,9 @@
    San Vu Ngoc 2019
 */
 
+/* set this to true for integration into the ocaml.org wesite */
+$ocamlorg: false;
+   
 /* Fonts */
 @import url('https://fonts.googleapis.com/css?family=Fira+Mono:400,500');
 @import url('https://fonts.googleapis.com/css?family=Noticia+Text:400,400i,700');
@@ -55,10 +58,8 @@ html.smooth-scroll {
 	border-spacing: 0;
     }
 
-    *, *:before, *:after { box-sizing: border-box; } }
- 
-  
-.api.content {
+    *, *:before, *:after { box-sizing: border-box; }
+    
     /*top: 45px;*/
     max-width: 90ex;
     margin-left: calc(10vw + 20ex);
@@ -75,11 +76,9 @@ html.smooth-scroll {
     >header nav {
 	font-family: "Fira Sans", Helvetica, Arial, sans-serif;
     }
-}
 
 /* Basic markup elements */
-
-.api {    
+   
     b, strong {
 	font-weight: 600;
     }
@@ -161,11 +160,14 @@ html.smooth-scroll {
     *:target {
 	/*box-shadow: 0 0px 0 1px rgba(255, 215, 181, 0.8) !important;*/
 	border-radius: 1px;
-	border-bottom: 4px solid rgb(255, 215, 181);
+	/*border-bottom: 4px solid rgb(255, 215, 181);*/
+	box-shadow: 0 4px 0 0px rgb(255, 215, 181);
 	z-index: 0;
-	/* Because of fixed banner in the ocaml.org site, we have to offset the targets. See https://stackoverflow.com/questions/10732690/offsetting-an-html-anchor-to-adjust-for-fixed-header */
-	padding-top: 85px;
-	margin-top: -85px;
+	@if $ocamlorg {
+	    /* Because of fixed banner in the ocaml.org site, we have to offset the targets. See https://stackoverflow.com/questions/10732690/offsetting-an-html-anchor-to-adjust-for-fixed-header */
+	    padding-top: 85px;
+	    margin-top: -85px;
+	}
     }
 
   
@@ -649,7 +651,11 @@ html.smooth-scroll {
 
     .toc {
 	position: fixed;
-	top: 0px;
+	@if $ocamlorg {
+	    top: 0px;
+	} @else {
+	    top: 66px;
+	}
 	bottom: 0px;
 	left: 0px;
 	max-width: 30ex;
@@ -792,11 +798,16 @@ html.smooth-scroll {
     }
 
     .toc.brand {
-	display: none; // for ocaml.org
+	@if $ocamlorg {
+	    display: none;
+	}
     }
     
     nav.toc {
-	top: 76px; // ocaml.org with full banner height
+	@if $ocamlorg {	
+	    top: 76px; 
+	    // ocaml.org with full banner height
+	}
     }
 
     nav.brand {
@@ -899,15 +910,16 @@ html.smooth-scroll {
     }
 }
 
-.api.content>table {
+.api>table {
     word-break: break-word;
 }
 
-.api.content>table td.module {
+.api>table td.module,
+.api>table td:first-child {
     width: 33%;
 }
 
-.api.content>table td:nth-child(2) {
+.api>table td:nth-child(2) {
     width: 65%;
 }
 
@@ -923,12 +935,9 @@ html.smooth-scroll {
     td div.info { /* index page */
 	padding-left: 0;
     }
-}
-
-.api.content > #search_results { margin-top: 2em; }
-
-.api {
-
+    
+    > #search_results { margin-top: 2em; }
+    
     input#api_search {
 	font-family: inherit;
     }
@@ -1033,23 +1042,23 @@ html.smooth-scroll {
 /* When the navigation bar is collapsed */
 // this should match with ocamlorg.css
 @media only screen and (max-width: 979px) {
-    .api *:target {
-	padding-top: 0px;
-	margin-top: 0px;
-    }
-     .container {
+    .container {
 	margin-left: auto;
 	margin-right: auto;
     }
-    .api.content {
-	margin: auto;
-	padding: 2.0em;
-    }
-    .api.content>header {
+    
+    .api>header {
 	box-shadow:   0px 3px 9px 3px #ddd;
     }
     
     .api {
+	*:target {
+	    padding-top: 0px;
+	    margin-top: 0px;
+	    margin: auto;
+	    padding: 2.0em;
+	}
+
 	.toc {
 	    position: static;
 	    width: auto;
@@ -1074,13 +1083,13 @@ html.smooth-scroll {
 	}
     }
 
-    .api.content>table {
+    .api>table {
 	box-shadow:   0px 3px 9px 3px #ddd;
 	margin-bottom: 1em;
 	padding-bottom: 2px;
     }
 
-    .api.content>table td:nth-child(2) { 
+    .api>table td:nth-child(2) { 
 	width: 59%; 
     }
 
@@ -1110,7 +1119,7 @@ html.smooth-scroll {
 	    display: block;
 	}
     }
-    .api.content>table td:first-child {
+    .api>table td:first-child {
 	width: 40%;
     }
 
@@ -1124,13 +1133,15 @@ html.smooth-scroll {
 
 
 /* When the navigation bar has reduced size */
-@media (max-height: 600px) and (min-width: 980px) {
-    .api *:target {
-	padding-top: 60px;
-	margin-top: -60px;
-    }
-    .api nav.toc {
-	top: 46px;
+@if $ocamlorg {
+    @media (max-height: 600px) and (min-width: 980px) {
+	.api *:target {
+	    padding-top: 60px;
+	    margin-top: -60px;
+	}
+	.api nav.toc {
+	    top: 46px;
+	}
     }
 }
 
@@ -1155,8 +1166,6 @@ html.smooth-scroll {
 	    position: initial;
 	    background: #eee;
 	}
-    }
-    .api.content {
 	margin-left: 3em;
 	margin-right: 3em;
     }

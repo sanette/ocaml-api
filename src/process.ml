@@ -73,7 +73,6 @@ let process ?(search=true) file out =
   let body = soup $ "body" in
   set_name "div" body;
   add_class "api" body;
-  add_class "content" body;
   wrap body (create_element "body");
 
   (* Delete previous/up/next links *)
