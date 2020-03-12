@@ -10,11 +10,15 @@ let debug = match Array.to_list Sys.argv with
   
 let pr = if debug then print_endline else fun _ -> ()
 let home = "."
-let src_dir = "libref"
-let dst_dir = "docs"
-
 let with_dir = Filename.concat
                  
+(* Set this to the directory where to find the html sources of all versions: *)
+let html_maindir = "html"
+(* Set this to the destination directory: *)
+let docs_maindir = "docs"
+let src_dir version = "libref" |> with_dir version |> with_dir html_maindir
+let dst_dir version = version |> with_dir docs_maindir
+
 let do_option f = function
   | None -> ()
   | Some x -> f x
@@ -26,7 +30,6 @@ let map_option f = function
 let flat_option f = function
   | None -> None
   | Some x -> f x
-
 
 (* Header for ocaml.org md files. *)
 let md_head = "<!-- ((! set title API !)) ((! set documentation !)) ((! set api !)) ((! set nobreadcrumb !)) -->\n"
@@ -49,12 +52,12 @@ let search_widget with_description =
 	 onpaste    = \"this.oninput();\">
 <img src=\"search_icon.svg\" alt=\"Search\" class=\"svg\" onclick=\"mySearch(%b)\">%s</div>
 <div id=\"search_results\"></div>" with_description with_description
-    (if with_description then "<span class=\"search_comment\">(search values and descriptions)</span>" else "")
+    (if with_description then "<span class=\"search_comment\">(search values and descriptions - case sensitive)</span>" else "")
   |> parse
 
 let logo_html () = "<nav class=\"toc brand\"><a class=\"brand\" href=\"https://ocaml.org/\" ><img src=\"colour-logo-gray.svg\" class=\"svg\" alt=\"OCaml\" /></a></nav>" |> parse
   
-let process ?(search=true) file out =
+let process ?(search=true) ~version file out =
 
   sprintf "Processing %s ..." file |> pr;
   let html = read_file file in
@@ -141,6 +144,13 @@ let process ?(search=true) file out =
       create_element "a" ~inner_text:"< General Index"
         ~attributes:["href", "index.html"]
       |> prepend_child nav in
+  
+  (* Add version number *)
+  let vnum = create_element "div" ~class_:"toc_version" in
+  let a = create_element "a" ~inner_text:("Version " ^ version)
+      ~attributes:["href", "../index.html"; "id", "version-select"] in
+  append_child vnum a;
+  prepend_child nav vnum;
 
   (* Add logo *)
   prepend_child header (logo_html ());
@@ -160,13 +170,13 @@ let process ?(search=true) file out =
     |> (^) md_head 
     |> write_file md
       
-let process ?(overwrite=false) file out =
+let process ?(overwrite=false) ~version file out =
   if overwrite || not (Sys.file_exists out)
-  then Ok (process file out)
+  then Ok (process ~version file out)
   else Error (sprintf "File %s already exists." out)
 
-let all_html_files () =
-  Sys.readdir (with_dir home src_dir) |> Array.to_list
+let all_html_files version =
+  Sys.readdir (with_dir home (src_dir version)) |> Array.to_list
   |> List.filter (fun s -> Filename.extension s = ".html")
 
 
@@ -189,9 +199,9 @@ let parse_tdlist = function
     (mdule, value, (infohtml, infotext))
   | _ -> raise (Invalid_argument "parse_tdlist")
 
-let make_index () =
+let make_index version =
   let html = read_file ("index_values.html"
-                        |> with_dir src_dir
+                        |> with_dir (src_dir version)
                         |> with_dir home) in
   let soup = parse html in
   soup $ "table"
@@ -255,8 +265,9 @@ module Index = struct
         (a, (val_name, val_ref),
          (String.escaped info, String.escaped infotext)))
 
-  let make () =
-    let ch = Scanning.open_in ("index_values.html" |> with_dir src_dir) in
+  let make version =
+    let ch = Scanning.open_in ("index_values.html"
+                               |> with_dir (src_dir version)) in
     find ch "<table>";
     let rec loop list =
       if try find ch "<tr><td><a"; false with Not_found -> true
@@ -292,31 +303,95 @@ let save_index file index =
   output_string outch "]\n";
   close_out outch
 
-let process_index ?(fast=true) () =
+let process_index ?(fast=true) version =
   pr "Recreatig index file, please wait...";
   let t = Unix.gettimeofday () in
-  let index = if fast then Index.make () else make_index () in
+  let index = if fast then Index.make version else make_index version in
   sprintf "Index created. Time = %f\n" (Unix.gettimeofday () -. t) |> pr;
-  save_index (with_dir home "src/index.js") index;
+  save_index (with_dir home (sprintf "src/index-%s.js" version)) index;
   sprintf "Index saved. Time = %f\n" (Unix.gettimeofday () -. t) |> pr
 
-let process_html overwrite =
+let sys_mkdir dir =
+  if Sys.command (sprintf "mkdir -p %s" dir) <> 0
+  then failwith ("Could not create directory" ^ dir)
+
+let process_html overwrite version =
+  sys_mkdir (dst_dir version);
   let processed = ref 0 in
-  all_html_files ()
+  all_html_files version
   |> List.iter (fun file ->
-      match process ~overwrite
-              (file |> with_dir src_dir |> with_dir home)
-              (file |> with_dir dst_dir |> with_dir home) with
+      match process ~overwrite ~version
+              (file |> with_dir (src_dir version) |> with_dir home)
+              (file |> with_dir (dst_dir version) |> with_dir home) with
       | Ok () -> incr processed
       | Error s -> pr s
     );
   sprintf "HTML processing done: %u files have been processed." !processed |> pr
 
+(*-------------------------*)
+  
+let sys_cp file dst =
+  if Sys.command (sprintf "cp %s %s" file dst) <> 0
+  then failwith ("Could not copy " ^ file)
+
+let sys_mv file dst =
+  if Sys.command (sprintf "mv %s %s" file dst) <> 0
+  then failwith ("Could not move " ^ file)
+
+(* Download version of the "libref" if the dir does not exist yet. *)
+(* Remark: remove the html_maindir to force downloading everything. *)
+let download_version version =
+  let pwd = Sys.getcwd () in
+  begin try
+      let dir = Filename.concat html_maindir version in
+      if not (Sys.file_exists dir)
+      then begin
+        sys_mkdir dir;
+        let url = sprintf
+            "http://caml.inria.fr/distrib/ocaml-%s/ocaml-%s-refman-html.tar.gz"
+            version version in
+        let tmp = Filename.temp_file version ".tar.gz" in
+        if Sys.command (sprintf "wget %s -O %s" url tmp) <> 0
+        then failwith ("Could not download manual at " ^ url)
+        else begin
+          Sys.chdir (Filename.dirname tmp);
+          if Sys.command (sprintf "tar xvf %s" tmp) <> 0
+          then failwith (sprintf "Could not extract %s." tmp)
+          else begin
+            Sys.remove tmp;
+            sys_mv "htmlman/libref" (with_dir pwd dir);
+          end
+        end
+      end
+    with
+    | e -> Sys.chdir pwd; raise e
+  end;
+  Sys.chdir pwd
+
+let copy_css version =
+  sys_cp (sprintf "src/index-%s.js" version)
+    (with_dir (dst_dir version) "index.js");
+  ["style.css"; "search.js"; "scroll.js";
+   "colour-logo-gray.svg"; "search_icon.svg"] 
+  |> List.iter (fun src ->
+      let dst = src |> with_dir (dst_dir version) in
+      if not (Sys.file_exists dst)
+      then if Sys.command (sprintf "ln -s ../%s %s" src dst) <> 0
+        then failwith (sprintf "Could not link %s" dst))
+
 let () =
+  (* let all_versions = ["4.09"; "4.10"] in *)
+  
+  let all_versions = Array.init 11 (fun i -> sprintf "4.%02u" i)
+                     |> Array.to_list in
+  
+  List.iter download_version all_versions;
+
   let args = Sys.argv |> Array.to_list |> List.tl in
   let overwrite = List.mem "overwrite" args in
   let makeindex = List.mem "makeindex" args in
   let makehtml = List.mem "html" args || not makeindex in
-  if makehtml then process_html overwrite;
-  if makeindex then process_index ()
-      
+  if makehtml then List.iter (process_html overwrite) all_versions;
+  if makeindex then List.iter process_index all_versions;
+  List.iter copy_css all_versions
+

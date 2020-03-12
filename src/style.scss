@@ -633,6 +633,13 @@ html.smooth-scroll {
 
     /* Sidebar and TOC */
 
+    .toc_version {
+	font-size: smaller;
+	text-align: right;
+	a {
+	    color: #888;
+	}
+    }
     /*.toc ul:before */
     .toc_title
     {
@@ -793,7 +800,7 @@ html.smooth-scroll {
     }
 
     .brand img {
-	margin-top: 16px;
+	margin-top: 14px; // en principe 16
 	height: 36px;
     }
 
@@ -1042,7 +1049,7 @@ html.smooth-scroll {
 /* When the navigation bar is collapsed */
 // this should match with ocamlorg.css
 @media only screen and (max-width: 979px) {
-    .container {
+    .container, .api {
 	margin-left: auto;
 	margin-right: auto;
     }

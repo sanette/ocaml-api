@@ -401,6 +401,11 @@ html.smooth-scroll {
     color: #ec6a0d;
     margin-right: 4px;
     margin-left: -1em; }
+  .api .toc_version {
+    font-size: smaller;
+    text-align: right; }
+    .api .toc_version a {
+      color: #888; }
   .api .toc_title {
     display: block;
     /*content: "Contents";*/
@@ -500,7 +505,7 @@ html.smooth-scroll {
   .api ul.tutos_menu li.active a {
     color: black; }
   .api .brand img {
-    margin-top: 16px;
+    margin-top: 14px;
     height: 36px; }
   .api nav.brand {
     top: 0px;
@@ -644,7 +649,7 @@ html.smooth-scroll {
 
 /* When the navigation bar is collapsed */
 @media only screen and (max-width: 979px) {
-  .container {
+  .container, .api {
     margin-left: auto;
     margin-right: auto; }
 

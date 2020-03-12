@@ -18,24 +18,13 @@ Automatique (INRIA). A complete version can be obtained from
 
 2. Download or clone the repository
 
-3. Download the OCaml manual:
-
-```bash
-cd /tmp
-wget http://caml.inria.fr/distrib/ocaml-4.09/ocaml-4.09-refman-html.tar.gz
-```
-
-and move the `libref` directory (found in the `htmlman` dir) into the
-`ocaml-api` directory of Step 2.
-
-4. make
+3. make
 
 In the `ocaml-api` directory, run `make`.  This will run the
-`process.ml` script, which populates the `docs` directory, and copy
-the css, js and svg files.
+`process.ml` script, which downloads the manuals, populates the `docs`
+directory, and copy the css, js and svg files.
 
-
-5. Browse!
+4. Browse!
 
 `firefox docs/index.html`
 
@@ -45,7 +34,7 @@ Cleaning the `docs` directory:
 
 ```make clean```
 
-The `src/index.js` file can be re-created from scratch:
+The `src/index-??.js` files can be re-created from scratch:
 
 ```make index```
 
