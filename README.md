@@ -1,4 +1,4 @@
-# OCaml-api
+# OCaml-API
 
 Proposition for modernizing the OCaml API from the official manual
 
