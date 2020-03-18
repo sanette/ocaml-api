@@ -989,7 +989,11 @@ html.smooth-scroll {
 
     .info-desc p {
 	margin-bottom: 0;
+	code {
+	    white-space: normal;
+	}
     }
+
 
     /* essai pour les types union */
     table.typetable {
@@ -1046,6 +1050,12 @@ html.smooth-scroll {
 
 }
 
+
+#footer {
+    margin-left: 26ex;
+}
+
+
 /* When the navigation bar is collapsed */
 // this should match with ocamlorg.css
 @media only screen and (max-width: 979px) {
@@ -1062,8 +1072,6 @@ html.smooth-scroll {
 	*:target {
 	    padding-top: 0px;
 	    margin-top: 0px;
-	    margin: auto;
-	    padding: 2.0em;
 	}
 
 	.toc {
@@ -1136,7 +1144,11 @@ html.smooth-scroll {
 	}
     }
 
+    #footer {
+	margin-left: auto;
+    }   
 }
+
 
 
 /* When the navigation bar has reduced size */
@@ -1176,8 +1188,4 @@ html.smooth-scroll {
 	margin-left: 3em;
 	margin-right: 3em;
     }
-}
-
-#footer {
-    margin-left: 26ex;
 }

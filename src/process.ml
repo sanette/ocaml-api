@@ -31,6 +31,10 @@ let flat_option f = function
   | None -> None
   | Some x -> f x
 
+let string_of_opt = function
+  | None -> ""
+  | Some s -> s
+
 (* Header for ocaml.org md files. *)
 let md_head = "<!-- ((! set title API !)) ((! set documentation !)) ((! set api !)) ((! set nobreadcrumb !)) -->\n"
   
@@ -52,7 +56,7 @@ let search_widget with_description =
 	 onpaste    = \"this.oninput();\">
 <img src=\"search_icon.svg\" alt=\"Search\" class=\"svg\" onclick=\"mySearch(%b)\">%s</div>
 <div id=\"search_results\"></div>" with_description with_description
-    (if with_description then "<span class=\"search_comment\">(search values and descriptions - case sensitive)</span>" else "")
+    (if with_description then "<span class=\"search_comment\">(search values, type signatures, and descriptions - case sensitive)</span>" else "")
   |> parse
 
 let logo_html () = "<nav class=\"toc brand\"><a class=\"brand\" href=\"https://ocaml.org/\" ><img src=\"colour-logo-gray.svg\" class=\"svg\" alt=\"OCaml\" /></a></nav>" |> parse
@@ -147,7 +151,7 @@ let process ?(search=true) ~version file out =
   
   (* Add version number *)
   let vnum = create_element "div" ~class_:"toc_version" in
-  let a = create_element "a" ~inner_text:("Version " ^ version)
+  let a = create_element "a" ~inner_text:("API Version " ^ version)
       ~attributes:["href", "../index.html"; "id", "version-select"] in
   append_child vnum a;
   prepend_child nav vnum;
@@ -166,6 +170,8 @@ let process ?(search=true) ~version file out =
   (* Save ocamlorg md file *)
   if ocamlorg then
     let md = Filename.remove_extension out ^ ".md" in
+    soup $$ "a#version-select"
+    |> iter (set_attribute "href" "/docs");
     soup $ "div.api" |> to_string
     |> (^) md_head 
     |> write_file md
@@ -256,28 +262,86 @@ module Index = struct
     loop ()
 
   let extract_infotext list =
-    list |> List.map (fun (a, (val_name, val_ref), info) ->
+    list |> List.map (fun (a, (val_name, val_ref), info, signature) ->
         let infotext = Soup.texts (Soup.parse info) |> String.concat "" in
         let val_name = Soup.(parse val_name |> R.leaf_text) in
         (* We parse [val_name] simply to replace "&amp;" by "&", etc... it could
            be done much faster manually of course (saving 20% time...): there
            are only a very limited number of such cases. *)
         (a, (val_name, val_ref),
-         (String.escaped info, String.escaped infotext)))
+         (String.escaped info, String.escaped infotext), signature))
 
-  let make version =
+
+  (* Remove all <a> tags. Example:
+     {|'a <a href="Event.html#TYPEevent">event</a> -> ('a -> 'b) -> 'b <a href="Event.html#TYPEevent">event</a>|} ==> "'a event -> ('a -> 'b) -> 'b event"
+  *)
+  let strip_tag =
+    let reg = Str.regexp {|<[^>]+ [^>]+>\([^<]+\)</[^>]+>|} in
+    let reg_br = Str.regexp "<br>" in
+    let reg_space = Str.regexp "  +" in
+    fun s -> Str.global_replace reg "\\1" s
+             |> Str.global_replace reg_br " "
+             |> Str.global_replace reg_space " "
+             
+  (* Look for signature (with and without html formatting);
+     [id] is the HTML id of the value. Example:
+     # get_sig ~version:"4.10" ~id:"VALfloat_of_int" "Pervasives.html";;
+     - : string option = Some "int -> float"
+  *)
+  let get_sig ~version ~id file  =
+    sprintf "Looking for signature for %s in %s" id file |> pr;
+    let inch = open_in (file |> with_dir (src_dir version)) in
+    let reg = Str.regexp_string (sprintf {|id="%s"|} id) in
+    (* let reg_type = Str.regexp {|<code class="type">\(.+\)</code>|} in *)
+    let rec loop () = try
+        let line = input_line inch in
+        try let _ = Str.search_forward reg line 0 in
+          let code = parse line $ "code.type" in
+          let sig_txt = texts code
+                        |> String.concat ""
+                        |> String.escaped in
+
+          (* let _ = Str.search_forward reg_type line 0 in
+           * let the_sig = Str.matched_group 1 line |> strip_a_tag in *)
+          sprintf "Signature=[%s]" sig_txt |> pr;
+          close_in inch; Some (to_string code |> String.escaped, sig_txt)
+        with
+        | Not_found -> loop () 
+      with
+      | End_of_file -> close_in inch; None in
+    loop ()
+
+  (* Example: "Buffer.html#VALadd_subbytes" ==> Some "VALadd_subbytes" *)
+  let get_id ref =
+    try let i = String.index ref '#' in
+      Some (String.sub ref (i+1) (String.length ref - i - 1))
+    with Not_found -> sprintf "Could not find id for %s" ref |> pr; None
+
+  let make ?(with_sig = true) version =
     let ch = Scanning.open_in ("index_values.html"
                                |> with_dir (src_dir version)) in
     find ch "<table>";
     let rec loop list =
       if try find ch "<tr><td><a"; false with Not_found -> true
       then list
-      else let val_ref = bscanf ch " href=%S" sid in
+      else
+        (* Scan value reference *)
+        let val_ref = bscanf ch " href=%S" sid in
         let val_name = bscanf ch ">%s@<" sid in
         find ch  "[<a";
+
+        (* Scan module reference (ie. filename) *)
         let mod_ref = bscanf ch " href=%S" sid in
         let mod_name = bscanf ch ">%s@<" sid in
         bscanf ch "/a>]</td> <td>" ();
+
+        let signature =
+          if with_sig then
+            get_id val_ref
+            |> flat_option (fun id -> get_sig ~version ~id mod_ref)
+          else None in
+
+        (* Scan info *)
         let info = match bscanf ch "<%s@>" sid with
           | "/td" -> find ch "</tr>"; ""
           | "div class=\"info\"" -> 
@@ -285,11 +349,12 @@ module Index = struct
             "<div class=\"info\">" ^ s
           | s -> raise (Scan_failure s) in
         pr val_ref;
-        let new_entry = ((mod_name, mod_ref), (val_name, val_ref), info) in
+
+        let new_entry = ((mod_name, mod_ref), (val_name, val_ref), info, signature) in
         loop (new_entry :: list) in
     loop []
-    |> extract_infotext
-
+    |> extract_infotext;;
+    
 end
 (******************************************)
 
@@ -297,16 +362,20 @@ let save_index file index =
   let outch = open_out file in
   output_string outch "var GENERAL_INDEX = [\n";
   index
-  |> List.iter (fun (mdule, value, infolist) ->
-      fprintf outch "[\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\"],\n"
-        (fst mdule) (snd mdule) (fst value) (snd value) (fst infolist) (snd infolist));
+  |> List.iter (fun (mdule, value, infolist, signature) ->
+      fprintf outch {|["%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s"],|}
+        (fst mdule) (snd mdule) (fst value) (snd value) (fst infolist) (snd infolist)
+        (map_option fst signature |> string_of_opt)
+        (map_option snd signature |> string_of_opt);
+      output_string outch "\n");
   output_string outch "]\n";
   close_out outch
 
 let process_index ?(fast=true) version =
   pr "Recreatig index file, please wait...";
   let t = Unix.gettimeofday () in
-  let index = if fast then Index.make version else make_index version in
+  let index = if fast then Index.make version
+    else make_index version |> List.map (fun (a,b,c) -> (a,b,c,None)) in
   sprintf "Index created. Time = %f\n" (Unix.gettimeofday () -. t) |> pr;
   save_index (with_dir home (sprintf "src/index-%s.js" version)) index;
   sprintf "Index saved. Time = %f\n" (Unix.gettimeofday () -. t) |> pr
@@ -326,7 +395,8 @@ let process_html overwrite version =
       | Ok () -> incr processed
       | Error s -> pr s
     );
-  sprintf "HTML processing done: %u files have been processed." !processed |> pr
+  sprintf "Version %s, HTML processing done: %u files have been processed."
+    version !processed |> pr
 
 (*-------------------------*)
   
@@ -380,7 +450,7 @@ let copy_css version =
         then failwith (sprintf "Could not link %s" dst))
 
 let () =
-  (* let all_versions = ["4.09"; "4.10"] in *)
+  let _all_versions = ["4.10"] in
   
   let all_versions = Array.init 11 (fun i -> sprintf "4.%02u" i)
                      |> Array.to_list in
