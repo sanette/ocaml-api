@@ -615,6 +615,8 @@ html.smooth-scroll {
     padding-top: 0.5em; }
   .api .info-desc p {
     margin-bottom: 0; }
+    .api .info-desc p code {
+      white-space: normal; }
   .api table.typetable {
     width: 100%;
     word-break: normal;
@@ -647,6 +649,9 @@ html.smooth-scroll {
   .api nav .api_search img {
     margin-right: 0; }
 
+#footer {
+  margin-left: 26ex; }
+
 /* When the navigation bar is collapsed */
 @media only screen and (max-width: 979px) {
   .container, .api {
@@ -658,9 +663,7 @@ html.smooth-scroll {
 
   .api *:target {
     padding-top: 0px;
-    margin-top: 0px;
-    margin: auto;
-    padding: 2.0em; }
+    margin-top: 0px; }
   .api .toc {
     position: static;
     width: auto;
@@ -708,7 +711,10 @@ html.smooth-scroll {
     width: 40%; }
 
   .api code {
-    word-break: break-word; } }
+    word-break: break-word; }
+
+  #footer {
+    margin-left: auto; } }
 /* When the navigation bar has reduced size */
 /* Print adjustements. */
 /* This page can be nicely printed or saved to PDF (local version) */
@@ -730,5 +736,3 @@ html.smooth-scroll {
     .api .toc {
       position: initial;
       background: #eee; } }
-#footer {
-  margin-left: 26ex; }

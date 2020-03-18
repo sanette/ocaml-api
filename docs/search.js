@@ -5,6 +5,9 @@
 
 const MAX_RESULTS = 20;
 const MAX_ERROR = 10;
+const DESCR_INDEX = 4; // index of HTML description in index.js
+const SIG_INDEX = 6; // index of HTML signature in index.js
+const ERR_INDEX = 8; // length of each line in index.js
 
 let indexState = 'NOT_LOADED';
 
@@ -89,14 +92,16 @@ function subsError (subs, s) {
 function formatLine (line) {
     let html = '<code class="code"><a href="' + line[1] + '"><span class="constructor">' + line[0] + '</span></a>' +
 	'.' + '<a href="' + line[3] + '">' + line[2] + '</a></code>';
-    if (line.length > 5) { html += line[4]; }
+    if (line.length > 5) { html += (' : ' + line[SIG_INDEX] + '</pre>');
+			   html = '<pre>' + html + line[DESCR_INDEX]; }
     return (html);
 }
 
 // The initial format of an entry of the GENERAL_INDEX array is
 // [ module, module_link,
 //   value, value_link,
-//   html_description, bare_description ]
+//   html_description, bare_description,
+//   html_signature, bare_signature ]
 
 // If includeDescr is true, the line is truncated to its first 4
 // elements.  When searching, the search error is added at the end of
@@ -114,32 +119,45 @@ function mySearch (includeDescr) {
     let results = [];
     let html = "";
     let count = 0;
-    let err_index = 4;
+    let err_index = DESCR_INDEX;
+
     if (text !== "") {
 	let words = [];
 	if ( includeDescr ) {
-	    err_index = 6;
+	    err_index = ERR_INDEX;
+	    //console.log ('err_index=' + parseInt(err_index));
+	    
 	    // Split text into an array of non-empty words:
-	    words = text.split(" ").filter(function (s) {
+	    if ( text.includes("->") ) {
+		// this must be a type, so we don't split on single space
+		words = text.split("  "); } else {
+		    words = text.split(" ");
+		};
+	    words = words.filter(function (s) {
 		return (s !== "");})}
+	
 	results = GENERAL_INDEX.filter(function (line) {
 	    // We remove the html hrefs and add the Module.value complete name:
 	    let cleanLine = [line[0], line[2], line[0] + '.' + line[2]];
-	    line.length = err_index;
+	    line.length = err_index; // This truncates the line:
 	    // this removes the description part if includeDescr =
 	    // false (which modifies the lines of the GENERAL_INDEX.)
 	    if ( includeDescr ) {
-		cleanLine.push(line[5]); } // add the description
+		cleanLine.push(line[DESCR_INDEX+1]+' '+line[SIG_INDEX+1]);
+		// add the description and signature (txt format)
+	    }
 	    if ( hasSubString(text, cleanLine) ||
 		 // if includeDescr, we search for all separated words
 		 ( includeDescr && hasSubStrings(words, cleanLine))) {
 		// one could merge hasSubString and subMinError for efficiency
 		let error = subMinError(text, cleanLine);
 		if ( includeDescr ) {
-		    error = Math.min(error, subsError(words, line[5])); }
+		    error = Math.min(error,
+				     subsError(words, line[DESCR_INDEX+1]+line[SIG_INDEX+1])); }
 		line.push(error); // we add the error as element #err_index
 		return (true); } else {
 		    return (false); }});
+	
 	// We sort the results by relevance:
 	results.sort(function(line1, line2) {
 	    return (line1[err_index] - line2[err_index])});
