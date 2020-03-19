@@ -5,6 +5,9 @@
 /* set this to true for integration into the ocaml.org wesite */
 $ocamlorg: false;
    
+/* ocaml logo color */
+$logocolor: #ec6a0d;
+   
 /* Fonts */
 @import url('https://fonts.googleapis.com/css?family=Fira+Mono:400,500');
 @import url('https://fonts.googleapis.com/css?family=Noticia+Text:400,400i,700');
@@ -626,7 +629,7 @@ html.smooth-scroll {
 
     ul.itemize li::before {
 	content: "▶";
-	color: #ec6a0d;
+	color: $logocolor;
 	margin-right: 4px;
 	margin-left: -1em;
     }
@@ -769,6 +772,14 @@ html.smooth-scroll {
 	background: linear-gradient(to left, white 0%, rgb(237, 232, 229) 100%);
     }
 
+    #search_results li.match::before {
+	content: "▶";
+	font-size: smaller;
+	color: $logocolor;
+	float: left;
+	margin-left: -3ex;
+    }
+
     code.caml-example,
     div.caml-example, div.toplevel  {
 	/*    background: linear-gradient(to left, white 0%, rgb(243, 247, 246) 100%); */
@@ -785,8 +796,7 @@ html.smooth-scroll {
 	color: orangered;
     }
     .tutorial span {
-	/* ocaml logo color */
-	color: #ec6a0d;
+	color: $logocolor;
     }
     
     ul.tutos_menu {
@@ -951,6 +961,9 @@ html.smooth-scroll {
     
     #search_results ul {
 	list-style: none;
+	li {
+	    margin-bottom: 4px;
+	}
     }
 
     #search_results li div.info { /* index page */

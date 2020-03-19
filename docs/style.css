@@ -3,6 +3,7 @@
    San Vu Ngoc 2019
 */
 /* set this to true for integration into the ocaml.org wesite */
+/* ocaml logo color */
 /* Fonts */
 @import url("https://fonts.googleapis.com/css?family=Fira+Mono:400,500");
 @import url("https://fonts.googleapis.com/css?family=Noticia+Text:400,400i,700");
@@ -485,6 +486,12 @@ html.smooth-scroll {
     display: inline-block; }
   .api pre {
     background: linear-gradient(to left, white 0%, #ede8e5 100%); }
+  .api #search_results li.match::before {
+    content: "▶";
+    font-size: smaller;
+    color: #ec6a0d;
+    float: left;
+    margin-left: -3ex; }
   .api code.caml-example,
   .api div.caml-example, .api div.toplevel {
     /*    background: linear-gradient(to left, white 0%, rgb(243, 247, 246) 100%); */ }
@@ -496,7 +503,6 @@ html.smooth-scroll {
   .api div.caml-output.error {
     color: orangered; }
   .api .tutorial span {
-    /* ocaml logo color */
     color: #ec6a0d; }
   .api ul.tutos_menu {
     font-family: "Fira Sans";
@@ -591,6 +597,8 @@ html.smooth-scroll {
     font-family: inherit; }
   .api #search_results ul {
     list-style: none; }
+    .api #search_results ul li {
+      margin-bottom: 4px; }
   .api #search_results li div.info {
     /* index page */
     display: block;

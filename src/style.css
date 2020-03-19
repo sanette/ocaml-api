@@ -808,6 +808,11 @@ pre {
     background: linear-gradient(to left, white 0%, rgb(237, 232, 229) 100%);
 }
 
+#search_results pre .match::before {
+	content: "▶";
+	color: $logocolor; 
+}
+
 code.caml-example,
 div.caml-example, div.toplevel  {
 /*    background: linear-gradient(to left, white 0%, rgb(243, 247, 246) 100%); */
