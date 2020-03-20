@@ -443,9 +443,11 @@ html.smooth-scroll {
     font-family: inherit; }
   .api .toc #search_results {
     font-size: smaller; }
-  .api .toc #search_results ul a {
-    display: inline-block;
-    padding-left: 0; }
+    .api .toc #search_results ul li {
+      margin-bottom: 0; }
+    .api .toc #search_results ul a {
+      display: inline-block;
+      padding-left: 0; }
   .api .toc ul li a:hover {
     box-shadow: none;
     background-color: #edbf84;
@@ -567,7 +569,7 @@ html.smooth-scroll {
   .api table td {
     padding-left: 1ex;
     padding-right: 1ex;
-    float: left; }
+    /*float: left;*/ }
   .api table tr:last-child td {
     padding-bottom: 7px; }
 
@@ -629,6 +631,8 @@ html.smooth-scroll {
     width: 100%;
     word-break: normal;
     box-shadow: none; }
+    .api table.typetable td {
+      float: left; }
   .api td.typefieldcomment > code {
     display: none;
     /* this only applies to "(*" and "*)" */ }
