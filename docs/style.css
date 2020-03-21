@@ -82,6 +82,8 @@ html.smooth-scroll {
   .api table {
     border-collapse: collapse;
     border-spacing: 0; }
+    .api table thead {
+      background: #e4d9d3; }
   .api *, .api *:before, .api *:after {
     box-sizing: border-box; }
   .api > header {

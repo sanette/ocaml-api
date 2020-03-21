@@ -3,7 +3,12 @@ open Printf
 
 let ocamlorg = false
 (* set this to true to generate the .md files for ocaml.org *)
-  
+
+let compiler_libref = true
+(* set this to true to process compilerlibref instead of libref *)
+
+let libref = if compiler_libref then "compilerlibref" else "libref"
+    
 let debug = match Array.to_list Sys.argv with
   | [] -> true
   | list -> not (List.mem "silent" list)
@@ -14,9 +19,11 @@ let with_dir = Filename.concat
                  
 (* Set this to the directory where to find the html sources of all versions: *)
 let html_maindir = "html"
-(* Set this to the destination directory: *)
-let docs_maindir = "docs"
-let src_dir version = "libref" |> with_dir version |> with_dir html_maindir
+(* This is the destination directory: *)
+let docs_maindir =
+  if compiler_libref then libref |> with_dir "docs"
+  else "docs"
+let src_dir version = libref |> with_dir version |> with_dir html_maindir
 let dst_dir version = version |> with_dir docs_maindir
 
 let do_option f = function
@@ -104,7 +111,7 @@ let process ?(search=true) ~version file out =
     match attribute "id" h with
     | Some id -> 
       let href = "#" ^ id in
-      let a = create_element "a" ~inner_text:(R.leaf_text h) ~attributes:["href", href] in
+      let a = create_element "a" ~inner_text:(texts h |> String.concat "") ~attributes:["href", href] in
       append_child !li_current a
     | None -> () in
 
@@ -123,6 +130,7 @@ let process ?(search=true) ~version file out =
         append_child !li_current !h3_current;
         li_of_h !h3_current h
       | _ -> ());
+  pr "title";
   let title = soup $ "title" |> R.leaf_text in
   let href = let base = Filename.basename file in
     if String.sub base 0 5 = "type_"
@@ -140,7 +148,7 @@ let process ?(search=true) ~version file out =
       append_child ul uli;
       unwrap uli;
       if search then search_widget true |> prepend_child body;
-      create_element "h1" ~inner_text:"The OCaml API"
+      create_element "h1" ~inner_text:(sprintf "The OCaml %sAPI" (if compiler_libref then "Compiler " else ""))
       |> prepend_child body;
     | None ->
       if search then search_widget false |> prepend_child nav;
@@ -148,11 +156,12 @@ let process ?(search=true) ~version file out =
       create_element "a" ~inner_text:"< General Index"
         ~attributes:["href", "index.html"]
       |> prepend_child nav in
-  
+
   (* Add version number *)
   let vnum = create_element "div" ~class_:"toc_version" in
   let a = create_element "a" ~inner_text:("API Version " ^ version)
-      ~attributes:["href", "../index.html"; "id", "version-select"] in
+      ~attributes:["href", "../index.html";
+                   "id", "version-select"] in
   append_child vnum a;
   prepend_child nav vnum;
 
@@ -377,7 +386,7 @@ let process_index ?(fast=true) version =
   let index = if fast then Index.make version
     else make_index version |> List.map (fun (a,b,c) -> (a,b,c,None)) in
   sprintf "Index created. Time = %f\n" (Unix.gettimeofday () -. t) |> pr;
-  save_index (with_dir home (sprintf "src/index-%s.js" version)) index;
+  save_index (with_dir home (sprintf "src/%s/index-%s.js" libref version)) index;
   sprintf "Index saved. Time = %f\n" (Unix.gettimeofday () -. t) |> pr
 
 let sys_mkdir dir =
@@ -414,7 +423,8 @@ let download_version version =
   let pwd = Sys.getcwd () in
   begin try
       let dir = Filename.concat html_maindir version in
-      if not (Sys.file_exists dir)
+      if ((not compiler_libref) || float_of_string version >= 4.08) &&
+         not (Sys.file_exists (with_dir dir libref))
       then begin
         sys_mkdir dir;
         let url = sprintf
@@ -429,7 +439,8 @@ let download_version version =
           then failwith (sprintf "Could not extract %s." tmp)
           else begin
             Sys.remove tmp;
-            sys_mv "htmlman/libref" (with_dir pwd dir);
+            let src = with_dir "htmlman" libref in
+            sys_mv src (with_dir pwd dir);
           end
         end
       end
@@ -439,21 +450,27 @@ let download_version version =
   Sys.chdir pwd
 
 let copy_css version =
-  sys_cp (sprintf "src/index-%s.js" version)
+  sys_cp (sprintf "src/%s/index-%s.js" libref version)
     (with_dir (dst_dir version) "index.js");
   ["style.css"; "search.js"; "scroll.js";
    "colour-logo-gray.svg"; "search_icon.svg"] 
   |> List.iter (fun src ->
       let dst = src |> with_dir (dst_dir version) in
       if not (Sys.file_exists dst)
-      then if Sys.command (sprintf "ln -s ../%s %s" src dst) <> 0
+      then if begin
+        if compiler_libref then Sys.command (sprintf "ln -s ../../%s %s" src dst)
+        else Sys.command (sprintf "ln -s ../%s %s" src dst) end <> 0
         then failwith (sprintf "Could not link %s" dst))
 
 let () =
   let _all_versions = ["4.10"] in
-  
+
   let all_versions = Array.init 11 (fun i -> sprintf "4.%02u" i)
                      |> Array.to_list in
+
+  let all_versions = if compiler_libref
+    then List.filter (fun v -> float_of_string v >= 4.08) all_versions
+    else all_versions in
   
   List.iter download_version all_versions;
 

@@ -59,6 +59,9 @@ html.smooth-scroll {
     table {
 	border-collapse: collapse;
 	border-spacing: 0;
+	thead {
+	    background: rgb(228, 217, 211);
+	}
     }
 
     *, *:before, *:after { 

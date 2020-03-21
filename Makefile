@@ -1,7 +1,8 @@
 local:
-	mkdir -p docs
+	mkdir -p docs/compilerlibref
 	dune exec src/process.exe
 	cp src/index.html docs/
+	cp src/compilerlibref/index.html docs/compilerlibref/
 	cp src/search.js docs/
 	cp src/scroll.js docs/
 	cp src/colour-logo-gray.svg docs/
