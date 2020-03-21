@@ -2,7 +2,10 @@
 
 Proposition for modernizing the OCaml API from the official manual
 
-Try it out [here](https://sanette.github.io/ocaml-api/)
+Try it out [here](https://sanette.github.io/ocaml-api/) for the
+standard lib, or
+[there](https://sanette.github.io/ocaml-api/compilerlibref) for the
+compiler lib.
 
 
 _The documentation shown on the web page that is linked above is
