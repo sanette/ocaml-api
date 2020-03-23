@@ -37,7 +37,7 @@ Cleaning the `docs` directory:
 
 ```make clean```
 
-The `src/index-??.js` files can be re-created from scratch:
+The `src/*libref/index-??.js` files can be re-created from scratch:
 
 ```make index```
 
