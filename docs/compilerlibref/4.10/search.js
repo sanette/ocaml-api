@@ -1,1 +1,1 @@
-../../search.js
+../search.js

@@ -1,1 +1,1 @@
-../../scroll.js
+../scroll.js

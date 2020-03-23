@@ -2,7 +2,7 @@ open Soup
 open Printf
 
 let ocamlorg = false
-(* set this to true to generate the .md files for ocaml.org *)
+(* set this to true to generate the .md files for ocaml. *)
 
 let compiler_libref = true
 (* set this to true to process compilerlibref instead of libref *)
@@ -171,21 +171,27 @@ let process ?(search=true) ~version file out =
   (* Add copyright *)
   append_child body (copyright ());
 
-  (* Save new html file *)
-  let new_html = to_string soup in
+
   sprintf "Saving %s..." out |> pr;
-  write_file out new_html;
 
   (* Save ocamlorg md file *)
-  if ocamlorg then
-    let md = Filename.remove_extension out ^ ".md" in
+  if ocamlorg then begin
     soup $$ "a#version-select"
     |> iter (set_attribute "href" "/docs");
     soup $ "div.api" |> to_string
     |> (^) md_head 
-    |> write_file md
+    |> write_file out
+  end
+  else
+    (* Save new html file *)
+    let new_html = to_string soup in
+    write_file out new_html
+
       
 let process ?(overwrite=false) ~version file out =
+  let out = if ocamlorg
+    then Filename.remove_extension out ^ ".md"
+    else out in
   if overwrite || not (Sys.file_exists out)
   then Ok (process ~version file out)
   else Error (sprintf "File %s already exists." out)
@@ -457,9 +463,7 @@ let copy_css version =
   |> List.iter (fun src ->
       let dst = src |> with_dir (dst_dir version) in
       if not (Sys.file_exists dst)
-      then if begin
-        if compiler_libref then Sys.command (sprintf "ln -s ../../%s %s" src dst)
-        else Sys.command (sprintf "ln -s ../%s %s" src dst) end <> 0
+      then if Sys.command (sprintf "ln -s -f ../%s %s" src dst) <> 0
         then failwith (sprintf "Could not link %s" dst))
 
 let () =

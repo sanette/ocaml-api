@@ -2,7 +2,15 @@
    San Vu Ngoc 2019
 */
 
-/* set this to true for integration into the ocaml.org wesite */
+
+// TODO: revoir la table
+// https://sanette.github.io/ocaml-api/compilerlibref/4.08/Arg_helper.Make.html 
+   
+// (mais attention, ça a des conséquences partout ! Attention aux 
+// tables d'index, et aux tables de type...  
+
+// set this to true for integration into the ocaml.org wesite
+
 $ocamlorg: false;
    
 /* ocaml logo color */
@@ -50,20 +58,111 @@ html.smooth-scroll {
 	}
 }
 
+// tables are difficult to style, be careful.
+// These settings should apply to the main index tables
+// (like "index_values.html"), which do not have any particular class.
+// These tables have two columns.
+.api>table {
+    word-break: break-word; 
+    // this is unfortunately due to some very long names in Internal modules
+    
+    td.module,
+    td:first-child {
+	width: 33%;
+    }
+
+    td:nth-child(2) {
+	width: 65%;
+    }
+    td[align="left"] { 
+	// for the "Parameter" column of module signatures like Arg_helper.Make.html, which unfortunately have no class either.
+	
+	word-break: normal;
+    }
+    td[align="left"]:first-child {
+	width: 1%;
+    }
+
+}
+
 .api {
-    font-size: 15px;
+    //font-size: 15px;
     font-family: "Fira Sans", Helvetica, Arial, sans-serif;
     text-align: left;
     color: #333;
     background: #FFFFFF;
-    table {
+    table { 	
+	// tables are difficult to style, be careful	
 	border-collapse: collapse;
 	border-spacing: 0;
 	thead {
 	    background: rgb(228, 217, 211);
 	}
+	/* must be same as <pre>: */
+	background: linear-gradient(to left, white 0%, rgb(237, 232, 229) 100%);
+	width: 100%;
+	td {
+	    padding-left: 1ex;
+	    padding-right: 1ex;
+	    /*float: left;*/
+	}
+	/* add some room at the end of the table */
+	tr:last-child td {
+	    padding-bottom: 7px;
+	}
+    }
+    // Tables are used for describing types, in particular union types:
+    table.typetable {
+	width: 100%;
+	word-break: normal;
+	box-shadow: none;
+	td {
+	    float: left;
+	}
+	td:nth-child(2) {
+	    width: 35%;
+	}
+	td:last-child {
+	    width: calc(100% - 1.1em); 
+	    // cf: CamlinternalFormatBasics.html
+	    // the 1.1em is related to the 1em below
+	}
+	td:first-child {
+	    width: 1em;
+	}
+	td:nth-child(4).typefieldcomment {
+	    /* this should be the column with the type */
+	    width: 60%;
+	    /* not optimal, see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Format.html#symbolic
+	    but leaving it automatic is not always good either: see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Arg.html */
+	}
+	
     }
 
+    // for functor signature
+    table.paramstable {
+	word-break: normal;
+	td {
+	    code {
+		white-space: pre-wrap;
+	    }	    
+	}
+	td:first-child, td:nth-child(2) {
+	    width: 1em; // second column should contain only ":". First one will adapt to size.
+	}
+	
+    }
+    
+    .sig_block {
+	margin-bottom: -0.8em; // this hack is to compensate pre margin-top, because the sig_block ends to soon, it shoud actually include the "end)" line ==> REPORT THIS
+	pre {
+	    margin-top: 0;
+	}
+    }
+    pre .sig_block {
+	margin-bottom: 0; // see above
+    }
+	
     *, *:before, *:after { 
 	box-sizing: border-box; 
     }
@@ -437,22 +536,6 @@ html.smooth-scroll {
 	top: calc(50% - 5px);
 	height: 11px;
 	right: -29px;
-    }
-
-    /* Records and variants FIXME */
-
-    div.def table {
-	text-indent: 0em;
-	padding: 0;
-	margin-left: -2ex;
-    }
-
-    td.def {
-	padding-right: 2ex
-    }
-
-    .record td.def {
-	padding-left: 2ex;
     }
 
     td.doc *:first-child {
@@ -920,39 +1003,6 @@ html.smooth-scroll {
 	visibility: hidden;
     }
 
-
-    table {
-	/* must be same as <pre> */
-	background: linear-gradient(to left, white 0%, rgb(237, 232, 229) 100%);
-	width: 100%;
-    }
-
-    table td {
-	padding-left: 1ex;
-	padding-right: 1ex;
-	/*float: left;*/
-    }
-
-    /* add some room at the end of the table */
-    table tr:last-child td {
-	padding-bottom: 7px;
-    }
-}
-
-.api>table {
-    word-break: break-word;
-}
-
-.api>table td.module,
-.api>table td:first-child {
-    width: 33%;
-}
-
-.api>table td:nth-child(2) {
-    width: 65%;
-}
-
-.api { 
     code.type {
 	color: #8d543c;
     }
@@ -965,7 +1015,9 @@ html.smooth-scroll {
 	padding-left: 0;
     }
     
-    > #search_results { margin-top: 2em; }
+    > #search_results { 
+	margin-top: 2em; 
+    }
     
     input#api_search {
 	font-family: inherit;
@@ -1019,17 +1071,6 @@ html.smooth-scroll {
 	}
     }
 
-
-    /* essai pour les types union */
-    table.typetable {
-	width: 100%;
-	word-break: normal;
-	box-shadow: none;
-	td {
-	    float: left;
-	}
-    }
-
     td.typefieldcomment > code {
 	display: none; /* this only applies to "(*" and "*)" */
     }
@@ -1046,24 +1087,6 @@ html.smooth-scroll {
     td.typefieldcomment:last-child /* should apply to "*)" */
     {
 	display: none; 
-    }
-
-    table.typetable td:nth-child(2) {
-	width: 35%;
-    }
-
-    table.typetable td:last-child {
-	width: auto;
-    }
-
-    table.typetable tr td:first-child {
-	width: 1em;
-    }
-
-    table.typetable tr td:nth-child(4).typefieldcomment { /* this should be the column with the type */
-	width: 60%;
-	/* not optimal, see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Format.html#symbolic
-	but leaving it automatic is not always good either: see: file:///home/san/prog/ocaml/ocaml-api/dune-version/docs/Arg.html */
     }
 
     .api_search img {
@@ -1095,6 +1118,15 @@ html.smooth-scroll {
     .api>header {
 	box-shadow:   0px 3px 9px 3px #ddd;
     }
+
+    .api>table {
+	box-shadow:   0px 3px 9px 3px #ddd;
+	margin-bottom: 1em;
+	padding-bottom: 2px;
+	td:nth-child(2) { 
+	    width: 59%; 
+	}
+    }
     
     .api {
 	*:target {
@@ -1124,37 +1156,26 @@ html.smooth-scroll {
 	table td:first-child {
 	    padding-right: 0;
 	}
-    }
 
-    .api>table {
-	box-shadow:   0px 3px 9px 3px #ddd;
-	margin-bottom: 1em;
-	padding-bottom: 2px;
-    }
-
-    .api>table td:nth-child(2) { 
-	width: 59%; 
-    }
-
-    .api {    
 	table.typetable {
 	    box-shadow: none;
+	    td:nth-child(2) {
+		white-space: normal;
+		width: 41%;
+	    }
+	    tr td:nth-child(4).typefieldcomment {
+		width: 50%;
+		word-break: break-word;
+	    }
+	    td:last-child {
+		width: auto;
+	    }
+	    tr td:first-child {
+		padding-right: 0;
+		width: auto;
+	    }
 	}
-	table.typetable td:nth-child(2) {
-	    white-space: normal;
-	    width: 41%;
-	}
-	table.typetable tr td:nth-child(4).typefieldcomment {
-	    width: 50%;
-	    word-break: break-word;
-	}
-	table.typetable td:last-child {
-	    width: auto;
-	}
-	table.typetable tr td:first-child {
-	    padding-right: 0;
-	    width: auto;
-	}
+	
 	td div.info div.info-desc {
 	    padding-left: 0;
 	}
