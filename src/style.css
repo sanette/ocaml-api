@@ -275,6 +275,7 @@ p code, li code { /* useful ? */
     color: #0d2b3e;
     border-radius: 3px;
     padding: 0 0.3ex;
+    white-space: pre-wrap;
 }
 
 pre code {

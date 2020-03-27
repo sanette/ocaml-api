@@ -10,7 +10,7 @@ local:
 	cp src/colour-logo-gray.svg docs/
 	ln -f -s ../colour-logo-gray.svg docs/compilerlibref/
 	cp src/search_icon.svg docs/
-	ln -f -s ../search_icon.sv docs/compilerlibref/
+	ln -f -s ../search_icon.svg docs/compilerlibref/
 
 
 index:
