@@ -4,7 +4,7 @@ open Printf
 let ocamlorg = false
 (* set this to true to generate the .md files for ocaml. *)
 
-let compiler_libref = true
+let compiler_libref = false
 (* set this to true to process compilerlibref instead of libref *)
 
 let libref = if compiler_libref then "compilerlibref" else "libref"

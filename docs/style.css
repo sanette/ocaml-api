@@ -186,10 +186,7 @@ html.smooth-scroll {
     border-radius: 1px;
     /*border-bottom: 4px solid rgb(255, 215, 181);*/
     box-shadow: 0 4px 0 0px #ffd7b5;
-    z-index: 0;
-    /* Because of fixed banner in the ocaml.org site, we have to offset the targets. See https://stackoverflow.com/questions/10732690/offsetting-an-html-anchor-to-adjust-for-fixed-header */
-    padding-top: 85px;
-    margin-top: -85px; }
+    z-index: 0; }
   .api h2:target {
     /* background: linear-gradient(to bottom, rgb(253, 252, 252) 0%, rgba(255, 215, 181, 0.3) 100%) !important; */
     /*	transition: 300ms; this prevents margin-top:-80 to work... */ }
@@ -468,7 +465,7 @@ html.smooth-scroll {
     font-weight: 500; }
   .api .toc {
     position: fixed;
-    top: 0px;
+    top: 66px;
     bottom: 0px;
     left: 0px;
     max-width: 30ex;
@@ -558,13 +555,9 @@ html.smooth-scroll {
   .api .brand img {
     margin-top: 14px;
     height: 36px; }
-  .api .toc.brand {
-    display: none; }
-  .api nav.toc {
-    top: 76px; }
   .api nav.brand {
     top: 0px;
-    height: 66px; }
+    height: 67px; }
   .api span.c003 {
     font-family: "Fira Mono", courier;
     background-color: #f3ece6;
@@ -733,13 +726,6 @@ html.smooth-scroll {
   #footer {
     margin-left: auto; } }
 /* When the navigation bar has reduced size */
-@media (max-height: 600px) and (min-width: 980px) {
-  .api *:target {
-    padding-top: 60px;
-    margin-top: -60px; }
-
-  .api nav.toc {
-    top: 46px; } }
 /* Print adjustements. */
 /* This page can be nicely printed or saved to PDF (local version) */
 @media print {
