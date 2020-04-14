@@ -1,5 +1,5 @@
 // Searching the OCAML API.
-// San VU NGOC, 2019
+// San VU NGOC, 2019-2020
 
 // Thanks @steinuil for help on deferred loading.
 
@@ -59,12 +59,21 @@ function hasSubStrings (subs, line) {
 	return (hasSubString (sub, line)); }) !== -1);
 }
 
-// error of sub being a substring of s. Best if starts at 0. 
+// error of sub being a substring of s. Best if starts at 0. Except
+// for strings containing "->", which is then best if the substring is
+// at the most right-hand position (representing the "return type").
 function subError (sub, s) {
     let err = s.indexOf(sub);
     if (err == -1) { err = MAX_ERROR; }
-    else { err = Math.min(err,1) // 0 or 1
-	   + Math.abs((s.length - sub.length) / s.length);}
+    else {
+	if ( sub.includes("->") ) {
+	    err = Math.min(s.length - sub.length - err,1); // 0 or 1
+	    // err = 0 if the substring is right-aligned
+	} else {
+	    err = Math.min(err,1); // 0 or 1
+	    // err = 0 if the substring
+	}
+	err += Math.abs((s.length - sub.length) / s.length);}
     return (err)
     // between 0 and 2, except if MAX_ERROR
 }
