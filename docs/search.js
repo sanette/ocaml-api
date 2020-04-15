@@ -38,11 +38,15 @@ function loadingIndex (includeDescr) {
     }
 }
 
+// check if sub is a substring of s. The start/end of the string s are
+// marked by "^" and "$", and hence these chars can be used in sub to
+// refine the search.
 function isSubString (sub, s) {
     // s = s.toLowerCase();
     // sub = sub.toLowerCase();
     // case sensitive is better for OCaml modules.
-    return (s.indexOf(sub) !== -1);
+    let ss = "^" + s + "$";
+    return (ss.indexOf(sub) !== -1);
 }
 
 // line is a string array. We check if sub is a substring of one of
@@ -62,10 +66,27 @@ function hasSubStrings (subs, line) {
 // error of sub being a substring of s. Best if starts at 0. Except
 // for strings containing "->", which is then best if the substring is
 // at the most right-hand position (representing the "return type").
+// markers "^" and "$" for start/end of string can be used: if they
+// are not satisfied, the MAX_ERROR is returned.
 function subError (sub, s) {
+    let StartOnly = false;
+    let EndOnly = false;
+    if (sub.length>1) {
+	if (sub[0] == "^") {
+	    StartOnly = true;
+	    sub = sub.substring(1);
+	}
+	if (sub[sub.length - 1] == "$") {
+	    EndOnly = true;
+	    sub = sub.substring(0, sub.length - 1);
+	}
+    }
     let err = s.indexOf(sub);
-    if (err == -1) { err = MAX_ERROR; }
-    else {
+    if (err == -1 ||
+	(StartOnly && err != 0) ||
+	(EndOnly && err != s.length - sub.length)) {
+	err = MAX_ERROR;
+    } else {
 	if ( sub.includes("->") ) {
 	    err = Math.min(s.length - sub.length - err,1); // 0 or 1
 	    // err = 0 if the substring is right-aligned
@@ -91,6 +112,7 @@ function add (acc, a) {
     return acc + a;
 }
 
+// NOT used
 // return the mean of SubErrors for all substrings subs inside s
 function subsError (subs, s) {
     let errs = subs.map(function (sub) { return subError (sub, s); });
@@ -158,11 +180,14 @@ function mySearch (includeDescr) {
 	    // Split text into an array of non-empty words:
 	    if ( text.includes("->") ) {
 		// this must be a type, so we don't split on single space
-		words = text.split("  "); } else {
-		    words = text.split(" ");
-		};
+		words = text.split("  ");
+	    } else {
+		words = text.split(" ");
+	    };
 	    words = words.filter(function (s) {
-		return (s !== "");})}
+		return (s !== "")});
+	    console.log (words);
+	}
 	
 	results = GENERAL_INDEX.filter(function (line) {
 	    // We remove the html hrefs and add the Module.value complete name:
@@ -179,9 +204,12 @@ function mySearch (includeDescr) {
 		 // if includeDescr, we search for all separated words
 		 ( includeDescr && hasSubStrings(words, cleanLine) ) ) {
 		// one could merge hasSubString and subMinError for efficiency
-		let error = subMinError(text, cleanLine);
+		let error = MAX_ERROR;
 		if ( includeDescr ) {
-		    error = subsMinError(words, cleanLine); }
+		    error = subsMinError(words, cleanLine);
+		} else {
+		    error = subMinError(text, cleanLine);
+		}
 		line[err_index] = error;
 		// we add the error as element #err_index
 		return (true); }
