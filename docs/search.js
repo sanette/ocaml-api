@@ -2,6 +2,8 @@
 // San VU NGOC, 2019-2020
 
 // Thanks @steinuil for help on deferred loading.
+// Thanks @osener, @UnixJunkie, @Armael for very helpful suggestions
+// Thanks to all testers!
 
 const MAX_RESULTS = 20;
 const MAX_ERROR = 10;

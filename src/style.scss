@@ -1021,24 +1021,44 @@ html.smooth-scroll {
 	font-family: inherit;
     }
     
-    #search_results ul {
-	list-style: none;
-	li {
-	    margin-bottom: 4px;
+    #search_results {
+	ul {
+	    list-style: none;
+	    li {
+		margin-bottom: 4px;
+	    }
+	}
+
+	li div.info { /* index page */
+	    display: block;
+	    max-width: 70%;
+	    padding-left: 4em;
+	    margin-bottom: 1ex;
+	}
+
+	li div.info p { /* index page */
+	    margin: 0;
 	}
     }
 
-    #search_results li div.info { /* index page */
-	display: block;
-	max-width: 70%;
-	padding-left: 4em;
-	margin-bottom: 1ex;
+    .search_comment .search_help {
+	height: 0;
+	opacity: 0;
+	font-size: 10px;
+	overflow: hidden;
+	transition: all 0.5s;
+    }
+    .search_comment:hover .search_help {
+	height: auto;
+	opacity: 0.8;
+	background: linear-gradient(to bottom, white 0%, rgb(237, 232, 229) 100%);
+	transition: all 0.5s;
+    }
+    .search_comment .search_help:hover {
+	font-size: 14px;
     }
 
-    #search_results li div.info p { /* index page */
-	margin: 0;
-    }
-
+    
     td div.info div.info-desc {
 	margin-bottom: 0;
     }

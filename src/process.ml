@@ -63,7 +63,9 @@ let search_widget with_description =
 	 onpaste    = \"this.oninput();\">
 <img src=\"search_icon.svg\" alt=\"Search\" class=\"svg\" onclick=\"mySearch(%b)\">%s</div>
 <div id=\"search_results\"></div>" with_description with_description
-    (if with_description then "<span class=\"search_comment\">(search values, type signatures, and descriptions - case sensitive)</span>" else "")
+    (if with_description
+     then {|<span class="search_comment">(search values, type signatures, and descriptions - case sensitive)<div class="search_help"><ul><li>You may search bare values, like <code>map</code>, or indicate the module, like <code>List.map</code>, or type signatures, like <code>int -> float</code>.</li><li>To combine several keywords, just separate them by a space - except if you want to search type signatures: then you must use <strong>two</strong> spaces as separators.</li><li>You may use the special chars <code>^</code> and <code>$</code> to indicate where the matched string should start or end, respectively.</li></ul></div></span>|}
+     else "")
   |> parse
 
 let logo_html () = "<nav class=\"toc brand\"><a class=\"brand\" href=\"https://ocaml.org/\" ><img src=\"colour-logo-gray.svg\" class=\"svg\" alt=\"OCaml\" /></a></nav>" |> parse
@@ -473,7 +475,7 @@ let copy_css version =
         then failwith (sprintf "Could not link %s" dst))
 
 let () =
-  let _all_versions = ["4.10"] in
+  let _all_versions = ["4.08"] in
 
   let all_versions = Array.init 11 (fun i -> sprintf "4.%02u" i)
                      |> Array.to_list in
