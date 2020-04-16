@@ -2,7 +2,7 @@ open Soup
 open Printf
 
 let ocamlorg = false
-(* set this to true to generate the .md files for ocaml. *)
+(* set this to true to generate the .md files for ocaml.org *)
 
 let compiler_libref = false
 (* set this to true to process compilerlibref instead of libref *)
