@@ -120,7 +120,10 @@ html.smooth-scroll {
 	    float: left;
 	}
 	td:nth-child(2) {
-	    width: 35%;
+	    width: 37%;
+	    code {
+		white-space: pre-line;
+	    }
 	}
 	td:last-child {
 	    width: calc(100% - 1.1em); 
@@ -1156,11 +1159,16 @@ html.smooth-scroll {
 	    box-shadow: none;
 	    td:nth-child(2) {
 		white-space: normal;
-		width: 41%;
+		/*width: 41%;*/
+		width: auto;
+		max-width: calc(100% - 3ex);
 	    }
 	    tr td:nth-child(4).typefieldcomment {
-		width: 50%;
+		/*width: 50%;*/
+		width: auto;
+		margin-left: 3ex;
 		word-break: break-word;
+		float: right;
 	    }
 	    td:last-child {
 		width: auto;
@@ -1169,6 +1177,10 @@ html.smooth-scroll {
 		padding-right: 0;
 		width: auto;
 	    }
+	}
+
+	.info-desc p code {
+	    word-break: break-word;
 	}
 	
 	td div.info div.info-desc {
@@ -1184,7 +1196,8 @@ html.smooth-scroll {
 
     .api { 
 	code { 
-	    word-break: break-word; 
+	    word-break: break-word;
+	    white-space: pre-wrap;
 	}
     }
 

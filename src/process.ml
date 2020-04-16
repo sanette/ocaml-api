@@ -303,8 +303,9 @@ module Index = struct
      # get_sig ~version:"4.10" ~id:"VALfloat_of_int" "Pervasives.html";;
      - : string option = Some "int -> float"
   *)
-  let get_sig ~version ~id file  =
+  let get_sig ?mod_name ~version ~id file  =
     sprintf "Looking for signature for %s in %s" id file |> pr;
+    let anon_t_regexp = Str.regexp "\\bt\\b" in
     let inch = open_in (file |> with_dir (src_dir version)) in
     let reg = Str.regexp_string (sprintf {|id="%s"|} id) in
     (* let reg_type = Str.regexp {|<code class="type">\(.+\)</code>|} in *)
@@ -316,6 +317,11 @@ module Index = struct
                         |> String.concat ""
                         |> String.escaped in
 
+          (* We now replace anonymous "t"'s by the qualified "Module.t" *)
+          let sig_txt = match mod_name with
+            | None -> sig_txt
+            | Some mod_name ->
+              Str.global_replace anon_t_regexp (mod_name ^ ".t") sig_txt in
           (* let _ = Str.search_forward reg_type line 0 in
            * let the_sig = Str.matched_group 1 line |> strip_a_tag in *)
           sprintf "Signature=[%s]" sig_txt |> pr;
@@ -353,7 +359,7 @@ module Index = struct
         let signature =
           if with_sig then
             get_id val_ref
-            |> flat_option (fun id -> get_sig ~version ~id mod_ref)
+            |> flat_option (fun id -> get_sig ~mod_name ~version ~id mod_ref)
           else None in
 
         (* Scan info *)
