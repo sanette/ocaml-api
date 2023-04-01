@@ -64,8 +64,8 @@ function getPosition(el) {
 // onclick function for smooth scrolling.
 function setSmooth () {
     let a = document.getElementsByTagName("a");
-    // let container = document.body.parentNode; // for ocaml.org
-    let container = document.body; // for local
+    let container = document.body.parentNode; // for ocaml.org
+    //let container = document.body; // for local
     let i;
     for (i = 0; i < a.length; i++) {
 	let href = a[i].getAttribute("href");
