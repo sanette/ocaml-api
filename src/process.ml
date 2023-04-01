@@ -8,6 +8,7 @@ let compiler_libref = false
 (* set this to true to process compilerlibref instead of libref *)
 
 let libref = if compiler_libref then "compilerlibref" else "libref"
+let favicon = if compiler_libref then "../../favicon.ico" else "../favicon.ico"
     
 let debug = match Array.to_list Sys.argv with
   | [] -> true
@@ -84,6 +85,12 @@ let process ?(search=true) ~version file out =
     create_element "script" ~attributes:["src","scroll.js"]
     |> append_child head;  
   end;
+
+  (* Add favicon *)
+  let head = soup $ "head" in
+  {|<link rel="shortcut icon" type="image/x-icon" href="|} ^ favicon ^ {|">|}
+  |> parse
+  |> append_child head;
 
   (* Add content wrapper *)
   let body = soup $ "body" in

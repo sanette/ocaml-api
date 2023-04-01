@@ -4,6 +4,7 @@ local:
 	cp src/index.html docs/
 	cp src/compilerlibref/index.html docs/compilerlibref/
 	cp src/search.js docs/
+	cp src/favicon.ico docs/
 	ln -f -s ../search.js docs/compilerlibref/
 	cp src/scroll.js docs/
 	ln -f -s ../scroll.js docs/compilerlibref/

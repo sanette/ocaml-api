@@ -18,7 +18,6 @@ let indexState = 'NOT_LOADED';
 
 // return true if we are loading the index file
 function loadingIndex (includeDescr) {
-
     switch (indexState) {
     case 'NOT_LOADED':
 	indexState = 'LOADING';
@@ -155,7 +154,7 @@ function formatLine (line) {
 //   html_description, bare_description,
 //   html_signature, bare_signature ]
 
-// If includeDescr is true, the line is truncated to its first 4
+// If includeDescr is false, the line is truncated to its first 4
 // elements.  When searching, the search error is added at the end of
 // each line.
 
