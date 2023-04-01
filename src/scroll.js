@@ -80,9 +80,9 @@ function setSmooth () {
 		if (! target) {
 		    console.log ("Error, no target for id=" + id);
 		    target = container; }
-		let top = container.scrollTop;
+		let top = Math.max(window.pageYOffset, document.documentElement.scrollTop, document.body.scrollTop);
 		let dist = top - getPosition(target)
-		//console.log ("click ==> " + getId(href) + ", distance = " + parseInt(Math.abs(dist)));
+		console.log ("click ==> " + getId(href) + ", distance = " + parseInt(Math.abs(dist)));
 		if (Math.abs(dist) < MAX_DISTANCE) {
 		    target.scrollIntoView({ block: "start", inline: "nearest", behavior: 'smooth' });
 		    setTimeout(function () {
